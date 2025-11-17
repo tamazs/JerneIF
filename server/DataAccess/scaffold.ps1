@@ -8,4 +8,4 @@ Get-Content .env | ForEach-Object {
 }
 
 dotnet tool install -g dotnet-ef
-dotnet ef dbcontext scaffold $env:CONN_STR Npgsql.EntityFrameworkCore.PostgreSQL --context DbContext --no-onconfiguring --schema library --force
+dotnet ef dbcontext scaffold $env:CONN_STR Npgsql.EntityFrameworkCore.PostgreSQL --context JerneDbContext --no-onconfiguring --schema public --force

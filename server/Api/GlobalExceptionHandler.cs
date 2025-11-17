@@ -5,13 +5,19 @@ namespace Api;
 
 public class GlobalExceptionHandler : IExceptionHandler
 {
-    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
+    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception,
+        CancellationToken cancellationToken)
     {
         var problemDetails = new ProblemDetails
         {
-            Title = exception.Message
+            Title = exception.Message,
+            Status = StatusCodes.Status500InternalServerError
         };
-        await httpContext.Response.WriteAsJsonAsync(problemDetails);
+
+        httpContext.Response.StatusCode = problemDetails.Status.Value;
+
+        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+
         return true;
     }
 }
