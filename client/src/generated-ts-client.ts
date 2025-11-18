@@ -173,13 +173,8 @@ export interface UserDto {
     fullName: string;
     phoneNumber: string;
     email: string;
-    role: UserRole;
+    role: string;
     isActive: boolean;
-}
-
-export enum UserRole {
-    Admin = 0,
-    Player = 1,
 }
 
 export interface RegisterRequestDto {
@@ -191,6 +186,7 @@ export interface RegisterRequestDto {
 
 export interface LoginUserDto {
     token: string;
+    refreshToken: string;
     user: UserDto;
 }
 

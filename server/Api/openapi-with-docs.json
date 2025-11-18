@@ -132,24 +132,12 @@
             "type": "string"
           },
           "role": {
-            "$ref": "#/components/schemas/UserRole"
+            "type": "string"
           },
           "isActive": {
             "type": "boolean"
           }
         }
-      },
-      "UserRole": {
-        "type": "integer",
-        "description": "",
-        "x-enumNames": [
-          "Admin",
-          "Player"
-        ],
-        "enum": [
-          0,
-          1
-        ]
       },
       "RegisterRequestDto": {
         "type": "object",
@@ -184,6 +172,9 @@
         "additionalProperties": false,
         "properties": {
           "token": {
+            "type": "string"
+          },
+          "refreshToken": {
             "type": "string"
           },
           "user": {

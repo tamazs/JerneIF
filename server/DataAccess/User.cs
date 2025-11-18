@@ -14,8 +14,8 @@ public partial class User
     public string Email { get; set; } = null!;
 
     public string PasswordHash { get; set; } = null!;
-    
-    public UserRole Role { get; set; }
+
+    public string Role { get; set; } = null!;
 
     public bool IsActive { get; set; }
 
@@ -24,6 +24,10 @@ public partial class User
     public DateTime? UpdatedAt { get; set; }
 
     public DateTime? DeletedAt { get; set; }
+
+    public string? RefreshToken { get; set; }
+
+    public DateTime? RefreshTokenExpiresAt { get; set; }
 
     public virtual ICollection<Board> Boards { get; set; } = new List<Board>();
 

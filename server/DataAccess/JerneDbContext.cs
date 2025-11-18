@@ -64,9 +64,6 @@ public partial class JerneDbContext : DbContext
             entity.HasKey(e => e.GameId).HasName("Games_pkey");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()");
-            
-            entity.Property(e => e.Status)
-                .HasConversion<string>();
 
             entity.HasOne(d => d.PublishedByUser).WithMany(p => p.Games)
                 .HasForeignKey(d => d.PublishedByUserId)
@@ -90,9 +87,6 @@ public partial class JerneDbContext : DbContext
 
             entity.Property(e => e.Amount).HasPrecision(10, 2);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()");
-            
-            entity.Property(e => e.Status)
-                .HasConversion<string>();
 
             entity.HasOne(d => d.ApprovedByUser).WithMany(p => p.TransactionApprovedByUsers)
                 .HasForeignKey(d => d.ApprovedByUserId)
@@ -113,9 +107,6 @@ public partial class JerneDbContext : DbContext
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()");
             entity.Property(e => e.IsActive).HasDefaultValue(false);
-            
-            entity.Property(e => e.Role)
-                .HasConversion<string>();
         });
 
         OnModelCreatingPartial(modelBuilder);

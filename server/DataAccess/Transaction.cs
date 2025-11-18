@@ -12,8 +12,8 @@ public partial class Transaction
     public string? MobilePayReference { get; set; }
 
     public decimal Amount { get; set; }
-    
-    public TransactionStatus Status { get; set; }
+
+    public string Status { get; set; } = null!;
 
     public string? ApprovedByUserId { get; set; }
 

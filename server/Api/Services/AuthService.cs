@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Api.DTOs;
 using Api.DTOs.Request;
@@ -26,7 +27,7 @@ public class AuthService(JerneDbContext dbContext, IConfiguration configuration)
             FullName = dto.FullName,
             PhoneNumber = dto.PhoneNumber,
             Email = dto.Email,
-            Role = UserRole.Player,
+            Role = UserRole.Player.ToString(),
             IsActive = true,
             CreatedAt = DateTime.UtcNow
         };
@@ -53,8 +54,26 @@ public class AuthService(JerneDbContext dbContext, IConfiguration configuration)
         return new LoginUserDto
         {
             Token = token,
+            RefreshToken = await GenerateAndSaveRefreshToken(user),
             User = new UserDto(user)
         };
+    }
+
+    private string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[32];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
+    }
+
+    private async Task<string> GenerateAndSaveRefreshToken(User user)
+    {
+        var refreshToken = GenerateRefreshToken();
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(7);
+        await dbContext.SaveChangesAsync();
+        return refreshToken;
     }
 
     private string CreateToken(User user)
@@ -62,7 +81,7 @@ public class AuthService(JerneDbContext dbContext, IConfiguration configuration)
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.UserId),
-            new Claim(ClaimTypes.Role, user.Role.ToString()),
+            new Claim(ClaimTypes.Role, user.Role),
         };
 
         var key = new SymmetricSecurityKey(
