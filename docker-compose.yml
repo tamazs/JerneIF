@@ -7,8 +7,3 @@ services:
       POSTGRES_PASSWORD: mysecret
     ports:
       - "5432:5432"
-  storage:
-    image: scireum/s3-ninja
-    restart: always
-    ports:
-      - "9000:9000"
