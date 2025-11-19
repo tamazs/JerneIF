@@ -70,6 +70,38 @@
         }
       }
     },
+    "/RefreshTokens": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "Auth_RefreshTokens",
+        "requestBody": {
+          "x-name": "dto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenRequestDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginUserDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/AuthenticatedEndpoint": {
       "get": {
         "tags": [
@@ -105,6 +137,29 @@
                 "schema": {
                   "type": "string",
                   "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GetUsers": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "operationId": "User_GetUsers",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserDto"
+                  }
                 }
               }
             }
@@ -195,6 +250,24 @@
             "minLength": 3
           },
           "password": {
+            "type": "string",
+            "minLength": 3
+          }
+        }
+      },
+      "RefreshTokenRequestDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "userId",
+          "refreshToken"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string",
+            "minLength": 3
+          },
+          "refreshToken": {
             "type": "string",
             "minLength": 3
           }

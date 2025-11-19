@@ -51,6 +51,7 @@ public class Program
         services.AddCors();
 
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IUserService, UserService>();
         
         services.AddProblemDetails();
         services.AddExceptionHandler<GlobalExceptionHandler>();
