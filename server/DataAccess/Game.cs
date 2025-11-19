@@ -10,8 +10,8 @@ public partial class Game
     public DateOnly StartDate { get; set; }
 
     public DateOnly EndDate { get; set; }
-    
-    public GameStatus Status { get; set; }
+
+    public string Status { get; set; } = null!;
 
     public DateTime? PublishedAt { get; set; }
 

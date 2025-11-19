@@ -70,6 +70,38 @@
         }
       }
     },
+    "/RefreshTokens": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "Auth_RefreshTokens",
+        "requestBody": {
+          "x-name": "dto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenRequestDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginUserDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/AuthenticatedEndpoint": {
       "get": {
         "tags": [
@@ -111,6 +143,29 @@
           }
         }
       }
+    },
+    "/GetUsers": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "operationId": "User_GetUsers",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -132,24 +187,12 @@
             "type": "string"
           },
           "role": {
-            "$ref": "#/components/schemas/UserRole"
+            "type": "string"
           },
           "isActive": {
             "type": "boolean"
           }
         }
-      },
-      "UserRole": {
-        "type": "integer",
-        "description": "",
-        "x-enumNames": [
-          "Admin",
-          "Player"
-        ],
-        "enum": [
-          0,
-          1
-        ]
       },
       "RegisterRequestDto": {
         "type": "object",
@@ -186,6 +229,9 @@
           "token": {
             "type": "string"
           },
+          "refreshToken": {
+            "type": "string"
+          },
           "user": {
             "$ref": "#/components/schemas/UserDto"
           }
@@ -204,6 +250,24 @@
             "minLength": 3
           },
           "password": {
+            "type": "string",
+            "minLength": 3
+          }
+        }
+      },
+      "RefreshTokenRequestDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "userId",
+          "refreshToken"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string",
+            "minLength": 3
+          },
+          "refreshToken": {
             "type": "string",
             "minLength": 3
           }
