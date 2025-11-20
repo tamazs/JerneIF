@@ -9,7 +9,7 @@ export default function LoginPage() {
         password: ""
     })
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         jerneCrud.loginUser(loginForm);
     };
@@ -37,7 +37,7 @@ export default function LoginPage() {
                         <label className="label">
                             <span className="label-text">Password</span>
                         </label>
-                        <input type="password" className="input validator" required placeholder="Password" minLength="8"
+                        <input type="password" className="input validator" required placeholder="Password" minLength={8}
                                pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
                                title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
                         onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })} />

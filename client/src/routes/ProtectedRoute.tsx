@@ -1,5 +1,6 @@
 import { Navigate } from "react-router";
 
+// @ts-ignore
 export default function ProtectedRoute({ children }) {
     const token = localStorage.getItem("accessToken");
 
