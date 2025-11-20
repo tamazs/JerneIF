@@ -1,8 +1,12 @@
 import {Link} from "react-router";
 import useJerneCrud from "../hooks/useJerneCrud.ts";
+import {useAtom} from "jotai";
+import {loggedInUserAtom} from "../atoms/jerneAtom.ts";
 
 export default function NavBar() {
     const jerneCrud = useJerneCrud();
+
+    const [loggedInUser] = useAtom(loggedInUserAtom);
 
     return (
         <div className="navbar bg-base-100 shadow-sm">
@@ -30,12 +34,12 @@ export default function NavBar() {
             </div>
             <div className="navbar-end">
                 <div className="dropdown dropdown-end">
-                    <div tabIndex={0} role="button" className="btn m-1">Click  ⬇️</div>
+                    <div tabIndex={0} role="button" className="btn m-1 flex items-center">{loggedInUser?.fullName} ▼</div>
                     <ul tabIndex="-1" className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+                        <li><a>Item 1</a></li>
                         <li><a onClick={() => {
                             jerneCrud.logoutUser()
                         }}>Logout</a></li>
-                        <li><a>Item 2</a></li>
                     </ul>
                 </div>
             </div>
