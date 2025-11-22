@@ -166,6 +166,68 @@
           }
         }
       }
+    },
+    "/UpdateUser": {
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "operationId": "User_UpdateUser",
+        "requestBody": {
+          "x-name": "dto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequestDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/DeleteUser": {
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "operationId": "User_DeleteUser",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -218,7 +280,7 @@
           },
           "password": {
             "type": "string",
-            "minLength": 3
+            "minLength": 6
           }
         }
       },
@@ -251,7 +313,7 @@
           },
           "password": {
             "type": "string",
-            "minLength": 3
+            "minLength": 6
           }
         }
       },
@@ -270,6 +332,44 @@
           "refreshToken": {
             "type": "string",
             "minLength": 3
+          }
+        }
+      },
+      "UpdateUserRequestDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "userId",
+          "fullName",
+          "phoneNumber",
+          "email",
+          "currentPassword",
+          "newPassword"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string",
+            "minLength": 3
+          },
+          "fullName": {
+            "type": "string",
+            "minLength": 3
+          },
+          "phoneNumber": {
+            "type": "string",
+            "minLength": 3
+          },
+          "email": {
+            "type": "string",
+            "minLength": 3
+          },
+          "currentPassword": {
+            "type": "string",
+            "minLength": 6
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 6
           }
         }
       }

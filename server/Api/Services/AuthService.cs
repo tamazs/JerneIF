@@ -49,6 +49,8 @@ public class AuthService(JerneDbContext dbContext, IConfiguration configuration)
         var verification = new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, dto.Password);
         if (verification ==  PasswordVerificationResult.Failed) throw new UnauthorizedAccessException("Invalid username or password");
         
+        if (!user.IsActive) throw new UnauthorizedAccessException("Your account is not active");
+        
         var token = CreateToken(user);
 
         return new LoginUserDto
