@@ -215,13 +215,17 @@ export class UserClient {
         this.baseUrl = baseUrl ?? "";
     }
 
-    getUsers(): Promise<UserDto[]> {
+    getUsers(sieveModel: SieveModel): Promise<UserDto[]> {
         let url_ = this.baseUrl + "/GetUsers";
         url_ = url_.replace(/[?&]$/, "");
 
+        const content_ = JSON.stringify(sieveModel);
+
         let options_: RequestInit = {
-            method: "GET",
+            body: content_,
+            method: "POST",
             headers: {
+                "Content-Type": "application/json",
                 "Accept": "application/json"
             }
         };
@@ -353,6 +357,16 @@ export interface LoginRequestDto {
 export interface RefreshTokenRequestDto {
     userId: string;
     refreshToken: string;
+}
+
+export interface SieveModelOfFilterTermAndSortTerm {
+    filters: string | undefined;
+    sorts: string | undefined;
+    page: number | undefined;
+    pageSize: number | undefined;
+}
+
+export interface SieveModel extends SieveModelOfFilterTermAndSortTerm {
 }
 
 export interface UpdateUserRequestDto {

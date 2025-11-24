@@ -4,14 +4,20 @@ using Api.DTOs.Request;
 using DataAccess;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
+using Sieve.Services;
 
 namespace Api.Services;
 
-public class UserService (JerneDbContext dbContext) : IUserService
+public class UserService (JerneDbContext dbContext, ISieveProcessor sieveProcessor) : IUserService
 {
-    public async Task<List<UserDto>> GetAllUsers()
+    public async Task<List<UserDto>> GetAllUsers(SieveModel sieveModel)
     {
-        return await dbContext.Users.Select(u => new UserDto(u)).ToListAsync();
+        IQueryable<User> users = dbContext.Users;
+        
+        users = sieveProcessor.Apply(sieveModel, users);
+        
+        return await users.Select(u => new UserDto(u)).ToListAsync();
     }
 
     public async Task<UserDto> UpdateUser(UpdateUserRequestDto dto)

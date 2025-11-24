@@ -2,6 +2,7 @@
 using Api.DTOs.Request;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using Sieve.Models;
 
 namespace Api.Controllers;
 
@@ -15,10 +16,10 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
-    [HttpGet(nameof(GetUsers))]
-    public async Task<List<UserDto>> GetUsers()
+    [HttpPost(nameof(GetUsers))]
+    public async Task<List<UserDto>> GetUsers([FromBody] SieveModel sieveModel)
     {
-        return await _userService.GetAllUsers();
+        return await _userService.GetAllUsers(sieveModel);
     }
 
     [HttpPut(nameof(UpdateUser))]
