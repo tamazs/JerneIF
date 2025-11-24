@@ -144,6 +144,137 @@
         }
       }
     },
+    "/CreateTransaction": {
+      "post": {
+        "tags": [
+          "Transaction"
+        ],
+        "operationId": "Transaction_CreateTransaction",
+        "requestBody": {
+          "x-name": "dto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTransactionRequestDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GetTransactions": {
+      "post": {
+        "tags": [
+          "Transaction"
+        ],
+        "operationId": "Transaction_GetTransactions",
+        "requestBody": {
+          "x-name": "sieveModel",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SieveModel"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TransactionDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ApproveTransaction": {
+      "put": {
+        "tags": [
+          "Transaction"
+        ],
+        "operationId": "Transaction_ApproveTransaction",
+        "requestBody": {
+          "x-name": "dto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveTransactionRequestDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/DenyTransaction": {
+      "put": {
+        "tags": [
+          "Transaction"
+        ],
+        "operationId": "Transaction_DenyTransaction",
+        "requestBody": {
+          "x-name": "dto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveTransactionRequestDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/GetUsers": {
       "post": {
         "tags": [
@@ -347,6 +478,71 @@
           }
         }
       },
+      "TransactionDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "transactionId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "mobilePayReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "status": {
+            "type": "string"
+          },
+          "approvedByUserId": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "approvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "CreateTransactionRequestDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "userId",
+          "mobilePayReference",
+          "amount"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string",
+            "minLength": 3
+          },
+          "mobilePayReference": {
+            "type": "string",
+            "minLength": 3
+          },
+          "amount": {
+            "type": "number",
+            "format": "decimal",
+            "minimum": 0.01
+          }
+        }
+      },
       "SieveModel": {
         "allOf": [
           {
@@ -383,6 +579,24 @@
             "maximum": 2147483647.0,
             "minimum": 1.0,
             "nullable": true
+          }
+        }
+      },
+      "ApproveTransactionRequestDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "userId",
+          "transactionId"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string",
+            "minLength": 3
+          },
+          "transactionId": {
+            "type": "string",
+            "minLength": 3
           }
         }
       },

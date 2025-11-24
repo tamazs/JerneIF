@@ -4,6 +4,7 @@ import ProtectedRoute from "./ProtectedRoute.tsx";
 import PlayerDashboard from "../pages/admin/PlayerDashboard.tsx";
 import AdminDashboard from "../pages/player/AdminDashboard.tsx";
 import LoginPage from "../pages/LoginPage.tsx";
+import Game from "../pages/player/Game.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -21,6 +22,10 @@ export const router = createBrowserRouter([
             {
                 path: "admin",
                 element: <AdminDashboard />
+            },
+            {
+                path: "game",
+                element: <Game />
             }
         ]
     },
