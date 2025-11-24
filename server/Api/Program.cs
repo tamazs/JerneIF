@@ -54,6 +54,7 @@ public class Program
         services.AddScoped<ISieveProcessor, SieveProcessor>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ITransactionService, TransactionService>();
         
         services.AddProblemDetails();
         services.AddExceptionHandler<GlobalExceptionHandler>();
