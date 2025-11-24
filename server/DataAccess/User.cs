@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Sieve.Attributes;
 
 namespace DataAccess;
 
@@ -7,22 +8,23 @@ public partial class User
 {
     public string UserId { get; set; } = null!;
 
+    [Sieve(CanFilter = true, CanSort = true)]
     public string FullName { get; set; } = null!;
 
     public string PhoneNumber { get; set; } = null!;
-
+    [Sieve(CanFilter = true, CanSort = true)]
     public string Email { get; set; } = null!;
 
     public string PasswordHash { get; set; } = null!;
-
+    [Sieve(CanFilter = true, CanSort = true)]
     public string Role { get; set; } = null!;
-
+    [Sieve(CanFilter = true, CanSort = true)]
     public bool IsActive { get; set; }
-
+    [Sieve(CanFilter = true, CanSort = true)]
     public DateTime CreatedAt { get; set; }
-
+    [Sieve(CanFilter = true, CanSort = true)]
     public DateTime? UpdatedAt { get; set; }
-
+    [Sieve(CanFilter = true, CanSort = true)]
     public DateTime? DeletedAt { get; set; }
 
     public string? RefreshToken { get; set; }

@@ -5,6 +5,7 @@ using DataAccess;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Sieve.Services;
 
 namespace Api;
 
@@ -50,6 +51,7 @@ public class Program
         services.AddOpenApiDocument();
         services.AddCors();
 
+        services.AddScoped<ISieveProcessor, SieveProcessor>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
         
