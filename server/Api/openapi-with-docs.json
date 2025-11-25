@@ -199,6 +199,70 @@
         }
       }
     },
+    "/GetGameWinningNumbersForGame": {
+      "post": {
+        "tags": [
+          "GameWinningNumber"
+        ],
+        "operationId": "GameWinningNumber_GetGameWinningNumbersForGame",
+        "requestBody": {
+          "x-name": "gameId",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameWinningNumbersDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/AddGameWinningNumbers": {
+      "post": {
+        "tags": [
+          "GameWinningNumber"
+        ],
+        "operationId": "GameWinningNumber_AddGameWinningNumbers",
+        "requestBody": {
+          "x-name": "dto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddGameWinningNumbersDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameWinningNumbersDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/CreateTransaction": {
       "post": {
         "tags": [
@@ -607,6 +671,53 @@
             "maximum": 2147483647.0,
             "minimum": 1.0,
             "nullable": true
+          }
+        }
+      },
+      "GameWinningNumbersDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "gameWinningNumbersId": {
+            "type": "string"
+          },
+          "gameId": {
+            "type": "string"
+          },
+          "gameWinningNumbers": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
+      },
+      "AddGameWinningNumbersDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "gameId",
+          "userId",
+          "gameWinningNumbers"
+        ],
+        "properties": {
+          "gameId": {
+            "type": "string",
+            "minLength": 3
+          },
+          "userId": {
+            "type": "string",
+            "minLength": 3
+          },
+          "gameWinningNumbers": {
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 3,
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
           }
         }
       },
