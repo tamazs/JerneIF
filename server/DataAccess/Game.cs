@@ -1,22 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using Sieve.Attributes;
 
 namespace DataAccess;
 
 public partial class Game
 {
     public string GameId { get; set; } = null!;
-
-    public DateOnly StartDate { get; set; }
-
-    public DateOnly EndDate { get; set; }
-
+    [Sieve(CanFilter = true, CanSort = true)]
+    public DateTime StartDate { get; set; }
+    [Sieve(CanFilter = true, CanSort = true)]
+    public DateTime EndDate { get; set; }
+    [Sieve(CanFilter = true, CanSort = true)]
     public string Status { get; set; } = null!;
 
     public DateTime? PublishedAt { get; set; }
 
     public string? PublishedByUserId { get; set; }
-
+    [Sieve(CanFilter = true, CanSort = true)]
     public DateTime CreatedAt { get; set; }
 
     public DateTime? DeletedAt { get; set; }
