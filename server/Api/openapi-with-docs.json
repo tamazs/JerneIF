@@ -144,6 +144,61 @@
         }
       }
     },
+    "/GetAllGames": {
+      "post": {
+        "tags": [
+          "Game"
+        ],
+        "operationId": "Game_GetAllGames",
+        "requestBody": {
+          "x-name": "sieveModel",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SieveModel"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GameDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/CreateGame": {
+      "post": {
+        "tags": [
+          "Game"
+        ],
+        "operationId": "Game_CreateGame",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/CreateTransaction": {
       "post": {
         "tags": [
@@ -478,6 +533,83 @@
           }
         }
       },
+      "GameDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "gameId": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "publishedByUserId": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "SieveModel": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SieveModelOfFilterTermAndSortTerm"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false
+          }
+        ]
+      },
+      "SieveModelOfFilterTermAndSortTerm": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "filters": {
+            "type": "string",
+            "nullable": true
+          },
+          "sorts": {
+            "type": "string",
+            "nullable": true
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 2147483647.0,
+            "minimum": 1.0,
+            "nullable": true
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 2147483647.0,
+            "minimum": 1.0,
+            "nullable": true
+          }
+        }
+      },
       "TransactionDto": {
         "type": "object",
         "additionalProperties": false,
@@ -540,45 +672,6 @@
             "type": "number",
             "format": "decimal",
             "minimum": 0.01
-          }
-        }
-      },
-      "SieveModel": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/SieveModelOfFilterTermAndSortTerm"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false
-          }
-        ]
-      },
-      "SieveModelOfFilterTermAndSortTerm": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "filters": {
-            "type": "string",
-            "nullable": true
-          },
-          "sorts": {
-            "type": "string",
-            "nullable": true
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32",
-            "maximum": 2147483647.0,
-            "minimum": 1.0,
-            "nullable": true
-          },
-          "pageSize": {
-            "type": "integer",
-            "format": "int32",
-            "maximum": 2147483647.0,
-            "minimum": 1.0,
-            "nullable": true
           }
         }
       },

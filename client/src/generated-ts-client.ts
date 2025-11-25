@@ -205,6 +205,87 @@ export class AuthClient {
     }
 }
 
+export class GameClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    getAllGames(sieveModel: SieveModel): Promise<GameDto[]> {
+        let url_ = this.baseUrl + "/GetAllGames";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(sieveModel);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetAllGames(_response);
+        });
+    }
+
+    protected processGetAllGames(response: Response): Promise<GameDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as GameDto[];
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GameDto[]>(null as any);
+    }
+
+    createGame(): Promise<GameDto> {
+        let url_ = this.baseUrl + "/CreateGame";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "POST",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCreateGame(_response);
+        });
+    }
+
+    protected processCreateGame(response: Response): Promise<GameDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as GameDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GameDto>(null as any);
+    }
+}
+
 export class TransactionClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -518,6 +599,27 @@ export interface RefreshTokenRequestDto {
     refreshToken: string;
 }
 
+export interface GameDto {
+    gameId: string;
+    startDate: string;
+    endDate: string;
+    status: string;
+    publishedAt: string | undefined;
+    publishedByUserId: string | undefined;
+    createdAt: string;
+    deletedAt: string | undefined;
+}
+
+export interface SieveModelOfFilterTermAndSortTerm {
+    filters: string | undefined;
+    sorts: string | undefined;
+    page: number | undefined;
+    pageSize: number | undefined;
+}
+
+export interface SieveModel extends SieveModelOfFilterTermAndSortTerm {
+}
+
 export interface TransactionDto {
     transactionId: string;
     userId: string;
@@ -534,16 +636,6 @@ export interface CreateTransactionRequestDto {
     userId: string;
     mobilePayReference: string;
     amount: number;
-}
-
-export interface SieveModelOfFilterTermAndSortTerm {
-    filters: string | undefined;
-    sorts: string | undefined;
-    page: number | undefined;
-    pageSize: number | undefined;
-}
-
-export interface SieveModel extends SieveModelOfFilterTermAndSortTerm {
 }
 
 export interface ApproveTransactionRequestDto {
