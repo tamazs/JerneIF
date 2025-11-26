@@ -22,6 +22,8 @@ public partial class JerneDbContext : DbContext
     public virtual DbSet<Transaction> Transactions { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
+    
+    public virtual DbSet<GameWinner> GameWinners { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -104,6 +106,32 @@ public partial class JerneDbContext : DbContext
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()");
             entity.Property(e => e.IsActive).HasDefaultValue(false);
         });
+        
+        modelBuilder.Entity<GameWinner>(entity =>
+        {
+            entity.HasKey(e => e.WinnerId).HasName("GameWinners_pkey");
+
+            entity.Property(e => e.WonAt).HasDefaultValueSql("now()");
+
+            entity.HasOne(d => d.Game)
+                .WithMany(p => p.GameWinners)
+                .HasForeignKey(d => d.GameId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("fk_winner_game");
+
+            entity.HasOne(d => d.User)
+                .WithMany(p => p.GameWinners)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("fk_winner_user");
+
+            entity.HasOne(d => d.Board)
+                .WithMany(p => p.GameWinners)
+                .HasForeignKey(d => d.BoardId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("fk_winner_board");
+        });
+
 
         OnModelCreatingPartial(modelBuilder);
     }

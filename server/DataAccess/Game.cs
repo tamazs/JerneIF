@@ -27,4 +27,7 @@ public partial class Game
     public virtual GameWinningNumber? GameWinningNumber { get; set; }
 
     public virtual User? PublishedByUser { get; set; }
+    
+    public virtual ICollection<GameWinner> GameWinners { get; set; } = new List<GameWinner>();
+
 }

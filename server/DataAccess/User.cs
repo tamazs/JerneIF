@@ -38,4 +38,7 @@ public partial class User
     public virtual ICollection<Transaction> TransactionApprovedByUsers { get; set; } = new List<Transaction>();
 
     public virtual ICollection<Transaction> TransactionUsers { get; set; } = new List<Transaction>();
+    
+    public virtual ICollection<GameWinner> GameWinners { get; set; } = new List<GameWinner>();
+
 }
