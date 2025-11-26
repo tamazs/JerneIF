@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Sieve.Attributes;
 
 namespace DataAccess;
 
@@ -15,10 +16,10 @@ public partial class Board
 
     public bool IsRepeating { get; set; }
 
-    public string? RepeatingUntilGameId { get; set; }
+    public DateTime? RepeatingUntil { get; set; }
 
     public decimal Price { get; set; }
-
+    [Sieve(CanFilter = true, CanSort = true)]
     public DateTime PurchasedAt { get; set; }
 
     public DateTime? DeletedAt { get; set; }
@@ -26,8 +27,6 @@ public partial class Board
     public virtual BoardNumber? BoardNumber { get; set; }
 
     public virtual Game Game { get; set; } = null!;
-
-    public virtual Game? RepeatingUntilGame { get; set; }
 
     public virtual User User { get; set; } = null!;
 }

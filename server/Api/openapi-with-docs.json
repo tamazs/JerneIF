@@ -144,6 +144,73 @@
         }
       }
     },
+    "/GetAllBoards": {
+      "post": {
+        "tags": [
+          "Board"
+        ],
+        "operationId": "Board_GetAllBoards",
+        "requestBody": {
+          "x-name": "sieveModel",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SieveModel"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BoardDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/CreateBoard": {
+      "post": {
+        "tags": [
+          "Board"
+        ],
+        "operationId": "Board_CreateBoard",
+        "requestBody": {
+          "x-name": "dto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddBoardRequestDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/GetAllGames": {
       "post": {
         "tags": [
@@ -597,41 +664,45 @@
           }
         }
       },
-      "GameDto": {
+      "BoardDto": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
+          "boardId": {
+            "type": "string"
+          },
           "gameId": {
             "type": "string"
           },
-          "startDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "endDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "status": {
+          "userId": {
             "type": "string"
           },
-          "publishedAt": {
+          "numberCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isRepeating": {
+            "type": "boolean"
+          },
+          "repeatingUntil": {
             "type": "string",
             "format": "date-time",
             "nullable": true
           },
-          "publishedByUserId": {
-            "type": "string",
-            "nullable": true
+          "price": {
+            "type": "number",
+            "format": "decimal"
           },
-          "createdAt": {
+          "purchasedAt": {
             "type": "string",
             "format": "date-time"
           },
-          "deletedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
+          "boardNumbers": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
           }
         }
       },
@@ -670,6 +741,81 @@
             "format": "int32",
             "maximum": 2147483647.0,
             "minimum": 1.0,
+            "nullable": true
+          }
+        }
+      },
+      "AddBoardRequestDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "gameId",
+          "userId",
+          "isRepeating",
+          "boardNumbers"
+        ],
+        "properties": {
+          "gameId": {
+            "type": "string",
+            "minLength": 3
+          },
+          "userId": {
+            "type": "string",
+            "minLength": 3
+          },
+          "isRepeating": {
+            "type": "boolean"
+          },
+          "repeatingUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "boardNumbers": {
+            "type": "array",
+            "maxItems": 8,
+            "minItems": 5,
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
+      },
+      "GameDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "gameId": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "publishedByUserId": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
             "nullable": true
           }
         }

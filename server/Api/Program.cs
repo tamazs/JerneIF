@@ -57,6 +57,7 @@ public class Program
         services.AddScoped<ITransactionService, TransactionService>();
         services.AddScoped<IGameService, GameService>();
         services.AddScoped<IGameWinningNumberService, GameWinningNumberService>();
+        services.AddScoped<IBoardService, BoardService>();
         
         services.AddProblemDetails();
         services.AddExceptionHandler<GlobalExceptionHandler>();

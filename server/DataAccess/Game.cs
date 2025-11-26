@@ -22,9 +22,7 @@ public partial class Game
 
     public DateTime? DeletedAt { get; set; }
 
-    public virtual ICollection<Board> BoardGames { get; set; } = new List<Board>();
-
-    public virtual ICollection<Board> BoardRepeatingUntilGames { get; set; } = new List<Board>();
+    public virtual ICollection<Board> Boards { get; set; } = new List<Board>();
 
     public virtual GameWinningNumber? GameWinningNumber { get; set; }
 
