@@ -5,6 +5,8 @@ import PlayerDashboard from "../pages/admin/PlayerDashboard.tsx";
 import AdminDashboard from "../pages/player/AdminDashboard.tsx";
 import LoginPage from "../pages/LoginPage.tsx";
 import Game from "../pages/player/Game.tsx";
+import UsersList from "../pages/admin/UsersList.tsx";
+import AddUser from "../pages/admin/AddUser.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -26,6 +28,14 @@ export const router = createBrowserRouter([
             {
                 path: "game",
                 element: <Game />
+            },
+            {
+                path: "userslist",
+                element: <UsersList />
+            },
+            {
+                path: "adduser",
+                element: <AddUser />
             }
         ]
     },
