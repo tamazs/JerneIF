@@ -36,7 +36,8 @@ export default function AddUser() {
                         <label className="label">
                             <span className="label-text">Phone Number</span>
                         </label>
-                        <input type="tel" className="input validator tabular-nums" required pattern="[0-9]*" minlength="8" maxlength="8" title="Must be 10 digits" placeholder="55249095" onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })} />
+                        <input type="tel" className="input validator tabular-nums" required pattern="[0-9]*" minLength={8}
+                               maxLength={8} title="Must be 10 digits" placeholder="55249095" onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })} />
                         <div className="validator-hint">Must be 8 characters</div>
                     </div>
 
