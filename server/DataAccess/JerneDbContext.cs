@@ -33,14 +33,10 @@ public partial class JerneDbContext : DbContext
             entity.Property(e => e.Price).HasPrecision(10, 2);
             entity.Property(e => e.PurchasedAt).HasDefaultValueSql("now()");
 
-            entity.HasOne(d => d.Game).WithMany(p => p.BoardGames)
+            entity.HasOne(d => d.Game).WithMany(p => p.Boards)
                 .HasForeignKey(d => d.GameId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_board_game");
-
-            entity.HasOne(d => d.RepeatingUntilGame).WithMany(p => p.BoardRepeatingUntilGames)
-                .HasForeignKey(d => d.RepeatingUntilGameId)
-                .HasConstraintName("fk_board_repeating_until");
 
             entity.HasOne(d => d.User).WithMany(p => p.Boards)
                 .HasForeignKey(d => d.UserId)

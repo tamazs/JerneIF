@@ -205,6 +205,91 @@ export class AuthClient {
     }
 }
 
+export class BoardClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    getAllBoards(sieveModel: SieveModel): Promise<BoardDto[]> {
+        let url_ = this.baseUrl + "/GetAllBoards";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(sieveModel);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetAllBoards(_response);
+        });
+    }
+
+    protected processGetAllBoards(response: Response): Promise<BoardDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as BoardDto[];
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BoardDto[]>(null as any);
+    }
+
+    createBoard(dto: AddBoardRequestDto): Promise<BoardDto> {
+        let url_ = this.baseUrl + "/CreateBoard";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCreateBoard(_response);
+        });
+    }
+
+    protected processCreateBoard(response: Response): Promise<BoardDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as BoardDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BoardDto>(null as any);
+    }
+}
+
 export class GameClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -684,15 +769,16 @@ export interface RefreshTokenRequestDto {
     refreshToken: string;
 }
 
-export interface GameDto {
+export interface BoardDto {
+    boardId: string;
     gameId: string;
-    startDate: string;
-    endDate: string;
-    status: string;
-    publishedAt: string | undefined;
-    publishedByUserId: string | undefined;
-    createdAt: string;
-    deletedAt: string | undefined;
+    userId: string;
+    numberCount: number;
+    isRepeating: boolean;
+    repeatingUntil: string | undefined;
+    price: number;
+    purchasedAt: string;
+    boardNumbers: number[];
 }
 
 export interface SieveModelOfFilterTermAndSortTerm {
@@ -703,6 +789,25 @@ export interface SieveModelOfFilterTermAndSortTerm {
 }
 
 export interface SieveModel extends SieveModelOfFilterTermAndSortTerm {
+}
+
+export interface AddBoardRequestDto {
+    gameId: string;
+    userId: string;
+    isRepeating: boolean;
+    repeatingUntil: string | undefined;
+    boardNumbers: number[];
+}
+
+export interface GameDto {
+    gameId: string;
+    startDate: string;
+    endDate: string;
+    status: string;
+    publishedAt: string | undefined;
+    publishedByUserId: string | undefined;
+    createdAt: string;
+    deletedAt: string | undefined;
 }
 
 export interface GameWinningNumbersDto {
