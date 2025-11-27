@@ -37,4 +37,11 @@ public class TransactionController : ControllerBase
     public async Task<TransactionDto> DenyTransaction([FromBody]ApproveTransactionRequestDto dto) {
         return await _transactionService.DenyTransaction(dto);
     }
+
+    [HttpPost(nameof(GetTransactionsByUserId))]
+    public async Task<List<TransactionDto>> GetTransactionsByUserId([FromQuery] string userId,
+        [FromBody] SieveModel sieveModel)
+    {
+        return await _transactionService.GetTransactionsByUserId(userId, sieveModel);
+    }
 }

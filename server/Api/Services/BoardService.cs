@@ -12,11 +12,33 @@ public class BoardService(JerneDbContext dbContext, ISieveProcessor sieveProcess
 {
     public async Task<List<BoardDto>> GetAllBoards(SieveModel sieveModel)
     {
-        IQueryable<Board> boards = dbContext.Boards;
+        IQueryable<Board> boards = dbContext.Boards.Include(b => b.BoardNumber);
         
         boards = sieveProcessor.Apply(sieveModel, boards);
 
         return await boards.Select(b => new BoardDto(b)).ToListAsync();
+    }
+
+    public async Task<List<BoardDto>> GetBoardsByUserId(string userId, SieveModel sieveModel)
+    {
+        IQueryable<Board> boards = dbContext.Boards.Where(b => b.UserId == userId).Include(b => b.BoardNumber);
+        
+        boards = sieveProcessor.Apply(sieveModel, boards);
+
+        return await boards.Select(b => new BoardDto(b)).ToListAsync();
+    }
+
+    public async Task<decimal> GetBalance(string userId)
+    {
+        var totalDeposits = await dbContext.Transactions
+            .Where(t => t.UserId == userId && t.Status == TransactionStatus.Approved.ToString())
+            .SumAsync(t => (decimal?)t.Amount) ?? 0;
+        
+        var totalSpent = await dbContext.Boards
+            .Where(b => b.UserId == userId)
+            .SumAsync(b => (decimal?)b.Price) ?? 0;
+        
+        return totalDeposits - totalSpent;
     }
 
     public async Task<BoardDto> CreateBoard(AddBoardRequestDto dto)
@@ -33,16 +55,23 @@ public class BoardService(JerneDbContext dbContext, ISieveProcessor sieveProcess
             throw new ValidationException("Boards cannot be submitted after Saturday 17:00.");
         
         if (danishTime.DayOfWeek == DayOfWeek.Sunday)
-            throw new ValidationException("Boards cannot be submitted after on Sunday.");
+            throw new ValidationException("Boards cannot be submitted on Sunday.");
 
         var boardNumbers = new BoardNumber
         {
             BoardNumbersId = Guid.NewGuid().ToString(),
             BoardNumbers = dto.BoardNumbers
         };
+        
+        var balance = await GetBalance(dto.UserId);
 
         var numberCount = boardNumbers.BoardNumbers.Count;
         var price = CalculatePrice(numberCount);
+
+        if (balance < price)
+        {
+            throw new ValidationException("Insufficient balance.");
+        }
 
         var board = new Board
         {

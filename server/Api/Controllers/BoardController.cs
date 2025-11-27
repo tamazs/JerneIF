@@ -26,4 +26,16 @@ public class BoardController : ControllerBase
     {
         return await _boardService.CreateBoard(dto);
     }
+
+    [HttpGet(nameof(GetBalance))]
+    public async Task<decimal> GetBalance([FromQuery] string userId)
+    {
+        return await _boardService.GetBalance(userId);
+    }
+
+    [HttpPost(nameof(GetBoardsByUserId))]
+    public async Task<List<BoardDto>> GetBoardsByUserId([FromQuery] string userId, [FromBody] SieveModel sieveModel)
+    {
+        return await _boardService.GetBoardsByUserId(userId, sieveModel);
+    }
 }
