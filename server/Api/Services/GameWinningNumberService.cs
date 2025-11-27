@@ -17,7 +17,7 @@ public class GameWinningNumberService(JerneDbContext dbContext, IGameService gam
         return new GameWinningNumbersDto(gameWinningNumbers);
     }
 
-    public async Task<GameWinningNumbersDto> AddGameWinningNumbers(AddGameWinningNumbersDto dto)
+    public async Task<GameWinningNumbersDto> AddGameWinningNumbers(string userId, AddGameWinningNumbersDto dto)
 {
     Validator.ValidateObject(dto, new ValidationContext(dto), true);
     
@@ -39,7 +39,7 @@ public class GameWinningNumberService(JerneDbContext dbContext, IGameService gam
 
     try
     {
-        await CloseGame(game, dto.UserId);
+        await CloseGame(game, userId);
 
         var gameWinningNumbers = new GameWinningNumber
         {

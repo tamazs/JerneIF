@@ -954,7 +954,6 @@ export interface TransactionDto {
 }
 
 export interface CreateTransactionRequestDto {
-    userId: string;
     mobilePayReference: string;
     amount: number;
 }

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Api.DTOs;
 using Api.DTOs.Request;
 using Api.Services;
@@ -7,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers;
 
 [ApiController]
-public class AuthController : ControllerBase
+public class AuthController : BaseController
 {
     private readonly IAuthService _authService;
 
@@ -28,23 +29,10 @@ public class AuthController : ControllerBase
         return await _authService.LoginUser(dto);
     }
 
+    [Authorize]
     [HttpPost(nameof(RefreshTokens))]
     public async Task<LoginUserDto> RefreshTokens([FromBody] RefreshTokenRequestDto dto)
     {
-        return await _authService.RefreshTokens(dto);
-    }
-
-    [Authorize]
-    [HttpGet(nameof(AuthenticatedEndpoint))]
-    public IActionResult AuthenticatedEndpoint()
-    {
-        return Ok("You have been authenticated");
-    }
-    
-    [Authorize(Roles = "Admin")]
-    [HttpGet(nameof(AdminAuthenticatedEndpoint))]
-    public IActionResult AdminAuthenticatedEndpoint()
-    {
-        return Ok("You have been authenticated as admin");
+        return await _authService.RefreshTokens(CurrentUserId, dto);
     }
 }

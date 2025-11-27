@@ -28,14 +28,14 @@ public class TransactionService(JerneDbContext dbContext, ISieveProcessor sieveP
         return await transactions.Select(t => new TransactionDto(t)).ToListAsync();
     }
 
-    public async Task<TransactionDto> CreateTransaction(CreateTransactionRequestDto dto)
+    public async Task<TransactionDto> CreateTransaction(string userId, CreateTransactionRequestDto dto)
     {
         Validator.ValidateObject(dto, new ValidationContext(dto), true);
 
         var transaction = new Transaction
         {
             TransactionId = Guid.NewGuid().ToString(),
-            UserId = dto.UserId,
+            UserId = userId,
             MobilePayReference = dto.MobilePayReference,
             Amount = dto.Amount,
             Status = TransactionStatus.Pending.ToString(),
@@ -47,23 +47,23 @@ public class TransactionService(JerneDbContext dbContext, ISieveProcessor sieveP
         return new TransactionDto(transaction);
     }
 
-    public async Task<TransactionDto> ApproveTransaction(ApproveTransactionRequestDto dto)
+    public async Task<TransactionDto> ApproveTransaction(string userId, ApproveTransactionRequestDto dto)
     {
         var transaction = await dbContext.Transactions.FirstOrDefaultAsync(t => t.TransactionId == dto.TransactionId);
         if (transaction == null)  throw new KeyNotFoundException("Transaction not found.");
         transaction.Status = TransactionStatus.Approved.ToString();
-        transaction.ApprovedByUserId = dto.UserId;
+        transaction.ApprovedByUserId = userId;
         transaction.ApprovedAt = DateTime.UtcNow;
         await dbContext.SaveChangesAsync();
         return new TransactionDto(transaction);
     }
 
-    public async Task<TransactionDto> DenyTransaction(ApproveTransactionRequestDto dto)
+    public async Task<TransactionDto> DenyTransaction(string userId, ApproveTransactionRequestDto dto)
     {
         var transaction = await dbContext.Transactions.FirstOrDefaultAsync(t => t.TransactionId == dto.TransactionId);
         if (transaction == null)  throw new KeyNotFoundException("Transaction not found.");
         transaction.Status = TransactionStatus.Rejected.ToString();
-        transaction.ApprovedByUserId = dto.UserId;
+        transaction.ApprovedByUserId = userId;
         transaction.DeletedAt = DateTime.UtcNow;
         await dbContext.SaveChangesAsync();
         return new TransactionDto(transaction);
