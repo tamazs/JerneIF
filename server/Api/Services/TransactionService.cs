@@ -19,6 +19,15 @@ public class TransactionService(JerneDbContext dbContext, ISieveProcessor sieveP
         return await transactions.Select(t => new TransactionDto(t)).ToListAsync();
     }
 
+    public async Task<List<TransactionDto>> GetTransactionsByUserId(string userId, SieveModel sieveModel)
+    {
+        IQueryable<Transaction> transactions = dbContext.Transactions.Where(t => t.UserId == userId);
+        
+        transactions = sieveProcessor.Apply(sieveModel, transactions);
+        
+        return await transactions.Select(t => new TransactionDto(t)).ToListAsync();
+    }
+
     public async Task<TransactionDto> CreateTransaction(CreateTransactionRequestDto dto)
     {
         Validator.ValidateObject(dto, new ValidationContext(dto), true);
