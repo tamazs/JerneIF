@@ -22,6 +22,18 @@ public class BoardService(JerneDbContext dbContext, ISieveProcessor sieveProcess
     public async Task<BoardDto> CreateBoard(AddBoardRequestDto dto)
     {
         Validator.ValidateObject(dto, new ValidationContext(dto), true);
+        
+        var userAlreadyHasBoard = await dbContext.Boards.AnyAsync(b => b.UserId == dto.UserId && b.GameId == dto.GameId);
+
+        if (userAlreadyHasBoard) throw new ValidationException("You have already submitted a board for this game.");
+        
+        var danishTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Europe/Copenhagen");
+        
+        if (danishTime.DayOfWeek == DayOfWeek.Saturday && danishTime.Hour >= 17)
+            throw new ValidationException("Boards cannot be submitted after Saturday 17:00.");
+        
+        if (danishTime.DayOfWeek == DayOfWeek.Sunday)
+            throw new ValidationException("Boards cannot be submitted after on Sunday.");
 
         var boardNumbers = new BoardNumber
         {
