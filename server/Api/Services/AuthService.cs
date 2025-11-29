@@ -61,11 +61,11 @@ public class AuthService(JerneDbContext dbContext, IConfiguration configuration)
         };
     }
 
-    public async Task<LoginUserDto> RefreshTokens(RefreshTokenRequestDto dto)
+    public async Task<LoginUserDto> RefreshTokens(string userId, RefreshTokenRequestDto dto)
     {
         Validator.ValidateObject(dto, new ValidationContext(dto), true);
         
-        var user = await ValidateRefreshToken(dto.UserId, dto.RefreshToken);
+        var user = await ValidateRefreshToken(userId, dto.RefreshToken);
         if (user == null) throw new UnauthorizedAccessException("Invalid refresh token");
         
         var newAccessToken = CreateToken(user);

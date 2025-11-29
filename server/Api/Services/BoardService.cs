@@ -41,11 +41,11 @@ public class BoardService(JerneDbContext dbContext, ISieveProcessor sieveProcess
         return totalDeposits - totalSpent;
     }
 
-    public async Task<BoardDto> CreateBoard(AddBoardRequestDto dto)
+    public async Task<BoardDto> CreateBoard(string userId, AddBoardRequestDto dto)
     {
         Validator.ValidateObject(dto, new ValidationContext(dto), true);
         
-        var userAlreadyHasBoard = await dbContext.Boards.AnyAsync(b => b.UserId == dto.UserId && b.GameId == dto.GameId);
+        var userAlreadyHasBoard = await dbContext.Boards.AnyAsync(b => b.UserId == userId && b.GameId == dto.GameId);
 
         if (userAlreadyHasBoard) throw new ValidationException("You have already submitted a board for this game.");
         
@@ -63,7 +63,7 @@ public class BoardService(JerneDbContext dbContext, ISieveProcessor sieveProcess
             BoardNumbers = dto.BoardNumbers
         };
         
-        var balance = await GetBalance(dto.UserId);
+        var balance = await GetBalance(userId);
 
         var numberCount = boardNumbers.BoardNumbers.Count;
         var price = CalculatePrice(numberCount);
@@ -77,7 +77,7 @@ public class BoardService(JerneDbContext dbContext, ISieveProcessor sieveProcess
         {
             BoardId = Guid.NewGuid().ToString(),
             GameId = dto.GameId,
-            UserId = dto.UserId,
+            UserId = userId,
             NumberCount = numberCount,
             IsRepeating = dto.IsRepeating,
             RepeatingUntil = dto.RepeatingUntil,

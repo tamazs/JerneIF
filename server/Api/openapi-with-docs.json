@@ -1033,15 +1033,10 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "userId",
           "mobilePayReference",
           "amount"
         ],
         "properties": {
-          "userId": {
-            "type": "string",
-            "minLength": 3
-          },
           "mobilePayReference": {
             "type": "string",
             "minLength": 3

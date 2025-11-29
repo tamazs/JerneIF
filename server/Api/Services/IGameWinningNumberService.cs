@@ -6,5 +6,5 @@ namespace Api.Services;
 public interface IGameWinningNumberService
 {
     Task<GameWinningNumbersDto> GetGameWinningNumbersForGame(string gameId);
-    Task<GameWinningNumbersDto> AddGameWinningNumbers(AddGameWinningNumbersDto dto);
+    Task<GameWinningNumbersDto> AddGameWinningNumbers(string userId, AddGameWinningNumbersDto dto);
 }

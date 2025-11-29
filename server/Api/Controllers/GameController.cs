@@ -1,5 +1,6 @@
 ﻿using Api.DTOs;
 using Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 
@@ -15,12 +16,14 @@ public class GameController : ControllerBase
         _gameService = gameService;
     }
 
+    [Authorize]
     [HttpPost(nameof(GetAllGames))]
     public async Task<List<GameDto>> GetAllGames([FromBody] SieveModel sieveModel)
     {
         return await _gameService.GetAllGames(sieveModel);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost(nameof(CreateGame))]
     public async Task<GameDto> CreateGame()
     {

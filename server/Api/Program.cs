@@ -5,6 +5,7 @@ using DataAccess;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
 using Sieve.Services;
 
 namespace Api;
@@ -48,6 +49,7 @@ public class Program
                 };
             });
         services.AddControllers();
+        services.AddOpenApi();
         services.AddOpenApiDocument();
         services.AddCors();
 
@@ -74,7 +76,15 @@ public class Program
         Validator.ValidateObject(appOptions, new ValidationContext(appOptions), true);
         app.UseExceptionHandler();
         app.UseOpenApi();
-        app.UseSwaggerUi();
+        app.UseOpenApi();
+
+        if (app.Environment.IsDevelopment())
+        {
+            app.MapOpenApi(); // serves /openapi
+            app.MapScalarApiReference();
+        }
+
+
         app.UseCors(config => config.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().SetIsOriginAllowed(x => true));
         app.UseAuthorization();
         app.MapControllers();
