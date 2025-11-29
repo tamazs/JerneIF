@@ -127,82 +127,6 @@ export class AuthClient {
         }
         return Promise.resolve<LoginUserDto>(null as any);
     }
-
-    authenticatedEndpoint(): Promise<FileResponse> {
-        let url_ = this.baseUrl + "/AuthenticatedEndpoint";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/octet-stream"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processAuthenticatedEndpoint(_response);
-        });
-    }
-
-    protected processAuthenticatedEndpoint(response: Response): Promise<FileResponse> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
-            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
-            if (fileName) {
-                fileName = decodeURIComponent(fileName);
-            } else {
-                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            }
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<FileResponse>(null as any);
-    }
-
-    adminAuthenticatedEndpoint(): Promise<FileResponse> {
-        let url_ = this.baseUrl + "/AdminAuthenticatedEndpoint";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/octet-stream"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processAdminAuthenticatedEndpoint(_response);
-        });
-    }
-
-    protected processAdminAuthenticatedEndpoint(response: Response): Promise<FileResponse> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
-            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
-            if (fileName) {
-                fileName = decodeURIComponent(fileName);
-            } else {
-                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            }
-            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<FileResponse>(null as any);
-    }
 }
 
 export class BoardClient {
@@ -289,12 +213,8 @@ export class BoardClient {
         return Promise.resolve<BoardDto>(null as any);
     }
 
-    getBalance(userId: string | undefined): Promise<number> {
-        let url_ = this.baseUrl + "/GetBalance?";
-        if (userId === null)
-            throw new globalThis.Error("The parameter 'userId' cannot be null.");
-        else if (userId !== undefined)
-            url_ += "userId=" + encodeURIComponent("" + userId) + "&";
+    getBalance(): Promise<number> {
+        let url_ = this.baseUrl + "/GetBalance";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: RequestInit = {
@@ -326,12 +246,8 @@ export class BoardClient {
         return Promise.resolve<number>(null as any);
     }
 
-    getBoardsByUserId(userId: string | undefined, sieveModel: SieveModel): Promise<BoardDto[]> {
-        let url_ = this.baseUrl + "/GetBoardsByUserId?";
-        if (userId === null)
-            throw new globalThis.Error("The parameter 'userId' cannot be null.");
-        else if (userId !== undefined)
-            url_ += "userId=" + encodeURIComponent("" + userId) + "&";
+    getBoardsByUserId(sieveModel: SieveModel): Promise<BoardDto[]> {
+        let url_ = this.baseUrl + "/GetBoardsByUserId";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(sieveModel);
@@ -459,17 +375,17 @@ export class GameWinningNumberClient {
         this.baseUrl = baseUrl ?? "";
     }
 
-    getGameWinningNumbersForGame(gameId: string): Promise<GameWinningNumbersDto> {
-        let url_ = this.baseUrl + "/GetGameWinningNumbersForGame";
+    getGameWinningNumbersForGame(gameId: string | undefined): Promise<GameWinningNumbersDto> {
+        let url_ = this.baseUrl + "/GetGameWinningNumbersForGame?";
+        if (gameId === null)
+            throw new globalThis.Error("The parameter 'gameId' cannot be null.");
+        else if (gameId !== undefined)
+            url_ += "gameId=" + encodeURIComponent("" + gameId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(gameId);
-
         let options_: RequestInit = {
-            body: content_,
-            method: "POST",
+            method: "GET",
             headers: {
-                "Content-Type": "application/json",
                 "Accept": "application/json"
             }
         };
@@ -692,12 +608,8 @@ export class TransactionClient {
         return Promise.resolve<TransactionDto>(null as any);
     }
 
-    getTransactionsByUserId(userId: string | undefined, sieveModel: SieveModel): Promise<TransactionDto[]> {
-        let url_ = this.baseUrl + "/GetTransactionsByUserId?";
-        if (userId === null)
-            throw new globalThis.Error("The parameter 'userId' cannot be null.");
-        else if (userId !== undefined)
-            url_ += "userId=" + encodeURIComponent("" + userId) + "&";
+    getTransactionsByUserId(sieveModel: SieveModel): Promise<TransactionDto[]> {
+        let url_ = this.baseUrl + "/GetTransactionsByUserId";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(sieveModel);
@@ -818,12 +730,8 @@ export class UserClient {
         return Promise.resolve<UserDto>(null as any);
     }
 
-    deleteUser(userId: string | undefined): Promise<UserDto> {
-        let url_ = this.baseUrl + "/DeleteUser?";
-        if (userId === null)
-            throw new globalThis.Error("The parameter 'userId' cannot be null.");
-        else if (userId !== undefined)
-            url_ += "userId=" + encodeURIComponent("" + userId) + "&";
+    deleteUser(): Promise<UserDto> {
+        let url_ = this.baseUrl + "/DeleteUser";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: RequestInit = {
@@ -884,7 +792,6 @@ export interface LoginRequestDto {
 }
 
 export interface RefreshTokenRequestDto {
-    userId: string;
     refreshToken: string;
 }
 
@@ -894,7 +801,7 @@ export interface BoardDto {
     userId: string;
     numberCount: number;
     isRepeating: boolean;
-    repeatingUntil: string | undefined;
+    repeatCount: number;
     price: number;
     purchasedAt: string;
     boardNumbers: number[];
@@ -912,9 +819,8 @@ export interface SieveModel extends SieveModelOfFilterTermAndSortTerm {
 
 export interface AddBoardRequestDto {
     gameId: string;
-    userId: string;
     isRepeating: boolean;
-    repeatingUntil: string | undefined;
+    repeatCount: number;
     boardNumbers: number[];
 }
 
@@ -937,7 +843,6 @@ export interface GameWinningNumbersDto {
 
 export interface AddGameWinningNumbersDto {
     gameId: string;
-    userId: string;
     gameWinningNumbers: number[];
 }
 
@@ -959,7 +864,6 @@ export interface CreateTransactionRequestDto {
 }
 
 export interface ApproveTransactionRequestDto {
-    userId: string;
     transactionId: string;
 }
 
@@ -970,13 +874,6 @@ export interface UpdateUserRequestDto {
     email: string;
     currentPassword: string;
     newPassword: string;
-}
-
-export interface FileResponse {
-    data: Blob;
-    status: number;
-    fileName?: string;
-    headers?: { [name: string]: any };
 }
 
 export class ApiException extends Error {

@@ -102,48 +102,6 @@
         }
       }
     },
-    "/AuthenticatedEndpoint": {
-      "get": {
-        "tags": [
-          "Auth"
-        ],
-        "operationId": "Auth_AuthenticatedEndpoint",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/AdminAuthenticatedEndpoint": {
-      "get": {
-        "tags": [
-          "Auth"
-        ],
-        "operationId": "Auth_AdminAuthenticatedEndpoint",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/GetAllBoards": {
       "post": {
         "tags": [
@@ -217,16 +175,6 @@
           "Board"
         ],
         "operationId": "Board_GetBalance",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
         "responses": {
           "200": {
             "description": "",
@@ -248,16 +196,6 @@
           "Board"
         ],
         "operationId": "Board_GetBoardsByUserId",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
         "requestBody": {
           "x-name": "sieveModel",
           "content": {
@@ -268,7 +206,7 @@
             }
           },
           "required": true,
-          "x-position": 2
+          "x-position": 1
         },
         "responses": {
           "200": {
@@ -343,23 +281,21 @@
       }
     },
     "/GetGameWinningNumbersForGame": {
-      "post": {
+      "get": {
         "tags": [
           "GameWinningNumber"
         ],
         "operationId": "GameWinningNumber_GetGameWinningNumbersForGame",
-        "requestBody": {
-          "x-name": "gameId",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "string"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 1
-        },
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -543,16 +479,6 @@
           "Transaction"
         ],
         "operationId": "Transaction_GetTransactionsByUserId",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
         "requestBody": {
           "x-name": "sieveModel",
           "content": {
@@ -563,7 +489,7 @@
             }
           },
           "required": true,
-          "x-position": 2
+          "x-position": 1
         },
         "responses": {
           "200": {
@@ -655,16 +581,6 @@
           "User"
         ],
         "operationId": "User_DeleteUser",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 1
-          }
-        ],
         "responses": {
           "200": {
             "description": "",
@@ -771,14 +687,9 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "userId",
           "refreshToken"
         ],
         "properties": {
-          "userId": {
-            "type": "string",
-            "minLength": 3
-          },
           "refreshToken": {
             "type": "string",
             "minLength": 3
@@ -805,10 +716,9 @@
           "isRepeating": {
             "type": "boolean"
           },
-          "repeatingUntil": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
+          "repeatCount": {
+            "type": "integer",
+            "format": "int32"
           },
           "price": {
             "type": "number",
@@ -871,7 +781,6 @@
         "additionalProperties": false,
         "required": [
           "gameId",
-          "userId",
           "isRepeating",
           "boardNumbers"
         ],
@@ -880,17 +789,12 @@
             "type": "string",
             "minLength": 3
           },
-          "userId": {
-            "type": "string",
-            "minLength": 3
-          },
           "isRepeating": {
             "type": "boolean"
           },
-          "repeatingUntil": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
+          "repeatCount": {
+            "type": "integer",
+            "format": "int32"
           },
           "boardNumbers": {
             "type": "array",
@@ -965,15 +869,10 @@
         "additionalProperties": false,
         "required": [
           "gameId",
-          "userId",
           "gameWinningNumbers"
         ],
         "properties": {
           "gameId": {
-            "type": "string",
-            "minLength": 3
-          },
-          "userId": {
             "type": "string",
             "minLength": 3
           },
@@ -1052,14 +951,9 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "userId",
           "transactionId"
         ],
         "properties": {
-          "userId": {
-            "type": "string",
-            "minLength": 3
-          },
           "transactionId": {
             "type": "string",
             "minLength": 3

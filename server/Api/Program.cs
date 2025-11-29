@@ -60,6 +60,7 @@ public class Program
         services.AddScoped<IGameService, GameService>();
         services.AddScoped<IGameWinningNumberService, GameWinningNumberService>();
         services.AddScoped<IBoardService, BoardService>();
+        services.AddScoped<BalanceHelper>();
         
         services.AddProblemDetails();
         services.AddExceptionHandler<GlobalExceptionHandler>();
