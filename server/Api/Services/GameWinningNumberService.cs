@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services;
 
-public class GameWinningNumberService(JerneDbContext dbContext, IGameService gameService) : IGameWinningNumberService
+public class GameWinningNumberService(JerneDbContext dbContext, IGameService gameService, GameQueryHelper gameQueryHelper) : IGameWinningNumberService
 {
     public async Task<GameWinningNumbersDto> GetGameWinningNumbersForGame(string gameId)
     {
@@ -20,16 +20,18 @@ public class GameWinningNumberService(JerneDbContext dbContext, IGameService gam
     public async Task<GameWinningNumbersDto> AddGameWinningNumbers(string userId, AddGameWinningNumbersDto dto)
 {
     Validator.ValidateObject(dto, new ValidationContext(dto), true);
+
+    var activeGame = await gameQueryHelper.GetActiveGame();
     
     var game = await dbContext.Games
         .Include(g => g.Boards)
             .ThenInclude(b => b.BoardNumber)
-        .FirstOrDefaultAsync(g => g.GameId == dto.GameId);
+        .FirstOrDefaultAsync(g => g.GameId == activeGame.GameId);
 
     if (game == null)
         throw new KeyNotFoundException("Game not found.");
 
-    if (await dbContext.GameWinningNumbers.AnyAsync(x => x.GameId == dto.GameId))
+    if (await dbContext.GameWinningNumbers.AnyAsync(x => x.GameId == activeGame.GameId))
         throw new ValidationException("Winning numbers already exist for this game.");
 
     if (dto.GameWinningNumbers == null || dto.GameWinningNumbers.Count != 3 || dto.GameWinningNumbers.Any(n => n < 1 || n > 16))
@@ -44,7 +46,7 @@ public class GameWinningNumberService(JerneDbContext dbContext, IGameService gam
         var gameWinningNumbers = new GameWinningNumber
         {
             GameWinningNumbersId = Guid.NewGuid().ToString(),
-            GameId = dto.GameId,
+            GameId = activeGame.GameId,
             GameWinningNumbers = dto.GameWinningNumbers
         };
         

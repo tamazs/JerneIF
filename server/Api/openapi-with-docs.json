@@ -280,6 +280,26 @@
         }
       }
     },
+    "/GetActiveGame": {
+      "get": {
+        "tags": [
+          "Game"
+        ],
+        "operationId": "Game_GetActiveGame",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/GetGameWinningNumbersForGame": {
       "get": {
         "tags": [

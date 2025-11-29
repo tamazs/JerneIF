@@ -8,7 +8,7 @@ using Sieve.Services;
 
 namespace Api.Services;
 
-public class BoardService(JerneDbContext dbContext, ISieveProcessor sieveProcessor, BalanceHelper balanceHelper) : IBoardService
+public class BoardService(JerneDbContext dbContext, ISieveProcessor sieveProcessor, BalanceHelper balanceHelper, GameQueryHelper gameQueryHelper) : IBoardService
 {
     public async Task<List<BoardDto>> GetAllBoards(SieveModel sieveModel)
     {
@@ -31,13 +31,21 @@ public class BoardService(JerneDbContext dbContext, ISieveProcessor sieveProcess
     public async Task<BoardDto> CreateBoard(string userId, AddBoardRequestDto dto)
     {
         Validator.ValidateObject(dto, new ValidationContext(dto), true);
-        
-        var userAlreadyHasBoard = await dbContext.Boards.AnyAsync(b => b.UserId == userId && b.GameId == dto.GameId);
+
+        var activeGame = await gameQueryHelper.GetActiveGame();
+
+        var userAlreadyHasBoard =
+            await dbContext.Boards.AnyAsync(b => b.UserId == userId && b.GameId == activeGame.GameId);
 
         if (userAlreadyHasBoard) throw new ValidationException("You have already submitted a board for this game.");
         
         var danishTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Europe/Copenhagen");
         
+        if (danishTime.DayOfWeek == DayOfWeek.Saturday && danishTime.Hour >= 17)
+            throw new ValidationException("Boards cannot be submitted after Saturday 17:00.");
+
+        if (danishTime.DayOfWeek == DayOfWeek.Sunday)
+            throw new ValidationException("Boards cannot be submitted on Sunday.");
    
         var boardNumbers = new BoardNumber
         {
@@ -58,7 +66,7 @@ public class BoardService(JerneDbContext dbContext, ISieveProcessor sieveProcess
         var board = new Board
         {
             BoardId = Guid.NewGuid().ToString(),
-            GameId = dto.GameId,
+            GameId = activeGame.GameId,
             UserId = userId,
             NumberCount = numberCount,
             IsRepeating = dto.IsRepeating,
