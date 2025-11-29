@@ -16,7 +16,7 @@ public partial class Board
 
     public bool IsRepeating { get; set; }
 
-    public DateTime? RepeatingUntil { get; set; }
+    public int RepeatCount { get; set; }
 
     public decimal Price { get; set; }
     [Sieve(CanFilter = true, CanSort = true)]

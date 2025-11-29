@@ -10,7 +10,7 @@ public class AddBoardRequestDto
     [Required]
     public bool IsRepeating { get; set; }
 
-    public DateTime? RepeatingUntil { get; set; }
+    public int RepeatCount { get; set; }
     
     [Required]
     [MinLength(5)]

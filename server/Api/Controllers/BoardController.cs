@@ -11,10 +11,12 @@ namespace Api.Controllers;
 public class BoardController : BaseController
 {
     private readonly IBoardService _boardService;
+    private readonly BalanceHelper _balanceHelper;
 
-    public BoardController(IBoardService boardService)
+    public BoardController(IBoardService boardService, BalanceHelper balanceHelper)
     {
         _boardService = boardService;
+        _balanceHelper = balanceHelper;
     }
     
     [Authorize(Roles = "Admin")]
@@ -34,7 +36,7 @@ public class BoardController : BaseController
     [HttpGet(nameof(GetBalance))]
     public async Task<decimal> GetBalance()
     {
-        return await _boardService.GetBalance(CurrentUserId);
+        return await _balanceHelper.GetBalance(CurrentUserId);
     }
 
     [Authorize]

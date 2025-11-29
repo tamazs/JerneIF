@@ -11,7 +11,7 @@ public class BoardDto
         UserId = board.UserId;
         NumberCount = board.NumberCount;
         IsRepeating = board.IsRepeating;
-        RepeatingUntil = board.RepeatingUntil;
+        RepeatCount = board.RepeatCount;
         Price = board.Price;
         PurchasedAt = board.PurchasedAt;
         BoardNumbers = board.BoardNumber?.BoardNumbers ?? new List<int>();
@@ -26,7 +26,7 @@ public class BoardDto
 
     public bool IsRepeating { get; set; }
 
-    public DateTime? RepeatingUntil { get; set; }
+    public int RepeatCount { get; set; }
 
     public decimal Price { get; set; }
 
