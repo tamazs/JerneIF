@@ -4,9 +4,6 @@ namespace Api.DTOs.Request;
 
 public class AddBoardRequestDto
 {
-    [MinLength(3)] [Required]
-    public string GameId { get; set; } = null!;
-    
     [Required]
     public bool IsRepeating { get; set; }
 
