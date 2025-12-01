@@ -61,6 +61,7 @@ public class Program
         services.AddScoped<IGameWinningNumberService, GameWinningNumberService>();
         services.AddScoped<IBoardService, BoardService>();
         services.AddScoped<BalanceHelper>();
+        services.AddScoped<GameQueryHelper>();
         
         services.AddProblemDetails();
         services.AddExceptionHandler<GlobalExceptionHandler>();
