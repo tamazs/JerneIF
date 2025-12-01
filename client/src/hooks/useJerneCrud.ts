@@ -2,8 +2,8 @@ import {finalUrl} from "../baseUrl.ts";
 import {useAtom} from "jotai";
 import toast from "react-hot-toast";
 import customcatch from "../errors/customcatch.ts";
-import {AuthClient, type LoginRequestDto, } from "../generated-ts-client.ts";
-import {loggedInUserAtom, accessTokenAtom, refreshTokenAtom} from "../atoms/jerneAtom.ts";
+import {AuthClient, type LoginRequestDto, type RegisterRequestDto,} from "../generated-ts-client.ts";
+import {loggedInUserAtom, accessTokenAtom, refreshTokenAtom, usersAtom} from "../atoms/jerneAtom.ts";
 import {useNavigate} from "react-router";
 
 const authClient = new AuthClient(finalUrl);
@@ -11,6 +11,7 @@ const authClient = new AuthClient(finalUrl);
 export default function useJerneCrud() {
     const navigate = useNavigate();
 
+    const [users, setUsers] = useAtom(usersAtom);
     const [loggedInUser, setLoggedInUser] = useAtom(loggedInUserAtom);
     const [accessToken, setAccessToken] = useAtom(accessTokenAtom);
     const [refreshToken, setRefreshToken] = useAtom(accessTokenAtom);
@@ -38,6 +39,20 @@ export default function useJerneCrud() {
         }
     }
 
+    async function registerUser(dto: RegisterRequestDto) {
+        try {
+            const result = await authClient.registerUser(dto);
+            const duplicate = [...users];
+            duplicate.push(result);
+            setUsers(duplicate);
+            toast.success("Register successful!");
+            return result;
+        }
+        catch (e) {
+            customcatch(e);
+        }
+    }
+
     async function logoutUser() {
         setAccessToken(null);
         setRefreshToken(null);
@@ -52,6 +67,7 @@ export default function useJerneCrud() {
 
     return {
         loginUser,
-        logoutUser
+        logoutUser,
+        registerUser
     }
 }

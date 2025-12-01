@@ -1,18 +1,20 @@
 import { useState } from "react";
 import useJerneCrud from "../../hooks/useJerneCrud.ts";
-import type {LoginRequestDto} from "../../generated-ts-client.ts";
+import type {RegisterRequestDto} from "../../generated-ts-client.ts";
 
 
 export default function AddUser() {
     const jerneCrud = useJerneCrud();
-    const [loginForm, setLoginForm] = useState<LoginRequestDto>({
+    const [registerForm, setRegisterForm] = useState<RegisterRequestDto>({
+        fullName: "",
+        phoneNumber: "",
         email: "",
         password: ""
     })
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        jerneCrud.loginUser(loginForm);
+        jerneCrud.registerUser(registerForm);
     };
 
     return (
@@ -28,7 +30,7 @@ export default function AddUser() {
                         <label className="label">
                             <span className="label-text">Full Name</span>
                         </label>
-                        <input className="input validator" type="text" required placeholder="Hans Zimmer" onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })} />
+                        <input className="input validator" type="text" required placeholder="Your Name" onChange={(e) => setRegisterForm({ ...registerForm, fullName: e.target.value })} />
                         <div className="validator-hint">Enter your name</div>
                     </div>
 
@@ -37,7 +39,7 @@ export default function AddUser() {
                             <span className="label-text">Phone Number</span>
                         </label>
                         <input type="tel" className="input validator tabular-nums" required pattern="[0-9]*" minLength={8}
-                               maxLength={8} title="Must be 10 digits" placeholder="55249095" onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })} />
+                               maxLength={8} title="Must be 8 digits" placeholder="12345678" onChange={(e) => setRegisterForm({ ...registerForm, phoneNumber: e.target.value })} />
                         <div className="validator-hint">Must be 8 characters</div>
                     </div>
 
@@ -45,7 +47,7 @@ export default function AddUser() {
                         <label className="label">
                             <span className="label-text">Email</span>
                         </label>
-                        <input className="input validator" type="email" required placeholder="mail@site.com" onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })} />
+                        <input className="input validator" type="email" required placeholder="mail@site.com" onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })} />
                         <div className="validator-hint">Enter valid email address</div>
                     </div>
 
@@ -56,7 +58,7 @@ export default function AddUser() {
                         <input type="password" className="input validator" required placeholder="Password" minLength={8}
                                pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
                                title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
-                               onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })} />
+                               onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })} />
                         <p className="validator-hint">
                             Must be more than 8 characters, including
                             <br/>At least one number
