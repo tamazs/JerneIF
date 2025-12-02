@@ -94,7 +94,7 @@ export default function UsersList() {
                                     </div>
                                     <ul tabIndex={-1} className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
                                         <li><a>Edit User</a></li>
-                                        <li><a>Delete User</a></li>
+                                        <li><a onClick={() => jerneCrud.deleteUser(user.userId)}>Delete User</a></li>
                                     </ul>
                                 </div>
                             </td>

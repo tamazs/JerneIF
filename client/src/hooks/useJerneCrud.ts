@@ -64,6 +64,22 @@ export default function useJerneCrud() {
         }
     }
 
+    async function deleteUser(userId: string) {
+        try {
+            await userClient.deleteUser(userId);
+
+            setUsers(prev =>
+                prev.map(u =>
+                    u.userId === userId ? { ...u, isActive: false } : u
+                )
+            );
+
+            toast.success("User deactivated!");
+        } catch (e) {
+            customcatch(e);
+        }
+    }
+
     async function logoutUser() {
         setAccessToken(null);
         setRefreshToken(null);
@@ -80,6 +96,7 @@ export default function useJerneCrud() {
         loginUser,
         logoutUser,
         registerUser,
-        getAllUsers
+        getAllUsers,
+        deleteUser
     }
 }
