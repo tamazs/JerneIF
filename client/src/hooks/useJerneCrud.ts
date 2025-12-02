@@ -2,11 +2,13 @@ import {finalUrl} from "../baseUrl.ts";
 import {useAtom} from "jotai";
 import toast from "react-hot-toast";
 import customcatch from "../errors/customcatch.ts";
-import {AuthClient, type LoginRequestDto, type RegisterRequestDto,} from "../generated-ts-client.ts";
+import {AuthClient, UserClient, type LoginRequestDto, type RegisterRequestDto,} from "../generated-ts-client.ts";
 import {loggedInUserAtom, accessTokenAtom, refreshTokenAtom, usersAtom} from "../atoms/jerneAtom.ts";
 import {useNavigate} from "react-router";
+import {customFetch} from "./customFetch.ts";
 
 const authClient = new AuthClient(finalUrl);
+const userClient = new UserClient(finalUrl, customFetch);
 
 export default function useJerneCrud() {
     const navigate = useNavigate();
@@ -53,6 +55,15 @@ export default function useJerneCrud() {
         }
     }
 
+    async function getAllUsers(sieve: any) {
+        try {
+            const result = await userClient.getUsers(sieve);
+            setUsers(result);
+        } catch (e) {
+            customcatch(e);
+        }
+    }
+
     async function logoutUser() {
         setAccessToken(null);
         setRefreshToken(null);
@@ -68,6 +79,7 @@ export default function useJerneCrud() {
     return {
         loginUser,
         logoutUser,
-        registerUser
+        registerUser,
+        getAllUsers
     }
 }
