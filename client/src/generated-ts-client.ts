@@ -874,8 +874,10 @@ export interface UpdateUserRequestDto {
     fullName: string;
     phoneNumber: string;
     email: string;
-    currentPassword: string;
-    newPassword: string;
+    role: string | undefined;
+    isActive: boolean | undefined;
+    currentPassword: string | undefined;
+    newPassword: string | undefined;
 }
 
 export class ApiException extends Error {

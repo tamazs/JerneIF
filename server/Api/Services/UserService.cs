@@ -28,17 +28,29 @@ public class UserService (JerneDbContext dbContext, ISieveProcessor sieveProcess
 
         if (user == null) throw new KeyNotFoundException("User not found.");
         
-        var verification = new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, dto.CurrentPassword!);
-        if (verification ==  PasswordVerificationResult.Failed) throw new UnauthorizedAccessException("The current passwords do not match.");
+        var isPasswordChangeRequested = !string.IsNullOrWhiteSpace(dto.NewPassword);
 
+        if (isPasswordChangeRequested)
+        {
+            if (string.IsNullOrWhiteSpace(dto.CurrentPassword)) throw new ValidationException("Current password is required.");
+            
+            var verification = new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, dto.CurrentPassword!);
+            
+            if (verification == PasswordVerificationResult.Failed) throw new ValidationException("The current passwords do not match.");
+            
+            user.PasswordHash = new PasswordHasher<User>().HashPassword(user, dto.NewPassword!);
+        }
+        
         user.FullName = dto.FullName!;
         user.PhoneNumber = dto.PhoneNumber!;
         user.Email = dto.Email!;
         user.UpdatedAt = DateTime.UtcNow;
+        user.Role = dto.Role!;
         
-        if (!string.IsNullOrWhiteSpace(dto.NewPassword))
+        if (dto.IsActive is true)
         {
-            user.PasswordHash = new PasswordHasher<User>().HashPassword(user, dto.NewPassword!);
+            user.IsActive = true;
+            user.DeletedAt = null;
         }
         
         await dbContext.SaveChangesAsync();

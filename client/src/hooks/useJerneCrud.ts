@@ -2,7 +2,13 @@ import {finalUrl} from "../baseUrl.ts";
 import {useAtom} from "jotai";
 import toast from "react-hot-toast";
 import customcatch from "../errors/customcatch.ts";
-import {AuthClient, UserClient, type LoginRequestDto, type RegisterRequestDto,} from "../generated-ts-client.ts";
+import {
+    AuthClient,
+    UserClient,
+    type LoginRequestDto,
+    type RegisterRequestDto,
+    type UpdateUserRequestDto,
+} from "../generated-ts-client.ts";
 import {loggedInUserAtom, accessTokenAtom, refreshTokenAtom, usersAtom} from "../atoms/jerneAtom.ts";
 import {useNavigate} from "react-router";
 import {customFetch} from "./customFetch.ts";
@@ -64,6 +70,22 @@ export default function useJerneCrud() {
         }
     }
 
+    async function editUser(dto: UpdateUserRequestDto) {
+        try {
+            const result = await userClient.updateUser(dto);
+            const index = users.findIndex(u => u.userId === result.userId);
+
+            if (index > -1) {
+                const duplicate = [...users];
+                duplicate[index] = result;
+                setUsers(duplicate);
+                toast.success("Update successful!");
+            }
+        } catch (e) {
+            customcatch(e);
+        }
+    }
+
     async function deleteUser(userId: string) {
         try {
             await userClient.deleteUser(userId);
@@ -97,6 +119,7 @@ export default function useJerneCrud() {
         logoutUser,
         registerUser,
         getAllUsers,
-        deleteUser
+        deleteUser,
+        editUser
     }
 }

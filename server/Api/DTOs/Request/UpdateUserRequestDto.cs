@@ -16,9 +16,11 @@ public class UpdateUserRequestDto
     [MinLength(3)] [Required]
     public string? Email { get; set; }
     
-    [MinLength(6)] [Required]
+    public string? Role { get; set; }
+    
+    public bool? IsActive { get; set; }
+    
     public string? CurrentPassword { get; set; }
     
-    [MinLength(6)] [Required]
     public string? NewPassword { get; set; }
 }

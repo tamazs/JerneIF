@@ -2,12 +2,14 @@ import {useEffect, useState} from "react";
 import useJerneCrud from "../../hooks/useJerneCrud.ts";
 import {useAtom} from "jotai";
 import {usersAtom} from "../../atoms/jerneAtom.ts";
+import {useNavigate} from "react-router";
 
 export default function UsersList() {
     const [search, setSearch] = useState("");
     const [role, setRole] = useState("");
     const [active, setActive] = useState("");
     const [page, setPage] = useState(1);
+    const navigate = useNavigate();
 
     const [users] = useAtom(usersAtom);
 
@@ -93,7 +95,9 @@ export default function UsersList() {
                                     </svg>
                                     </div>
                                     <ul tabIndex={-1} className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
-                                        <li><a>Edit User</a></li>
+                                        <li><a onClick={() => {
+                                            navigate(`/edituser/${user.userId}`);
+                                        }}>Edit User</a></li>
                                         <li><a onClick={() => jerneCrud.deleteUser(user.userId)}>Delete User</a></li>
                                     </ul>
                                 </div>
