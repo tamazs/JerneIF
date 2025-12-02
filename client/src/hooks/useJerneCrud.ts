@@ -2,11 +2,19 @@ import {finalUrl} from "../baseUrl.ts";
 import {useAtom} from "jotai";
 import toast from "react-hot-toast";
 import customcatch from "../errors/customcatch.ts";
-import {AuthClient, type LoginRequestDto, type RegisterRequestDto,} from "../generated-ts-client.ts";
+import {
+    AuthClient,
+    UserClient,
+    type LoginRequestDto,
+    type RegisterRequestDto,
+    type UpdateUserRequestDto,
+} from "../generated-ts-client.ts";
 import {loggedInUserAtom, accessTokenAtom, refreshTokenAtom, usersAtom} from "../atoms/jerneAtom.ts";
 import {useNavigate} from "react-router";
+import {customFetch} from "./customFetch.ts";
 
 const authClient = new AuthClient(finalUrl);
+const userClient = new UserClient(finalUrl, customFetch);
 
 export default function useJerneCrud() {
     const navigate = useNavigate();
@@ -53,6 +61,47 @@ export default function useJerneCrud() {
         }
     }
 
+    async function getAllUsers(sieve: any) {
+        try {
+            const result = await userClient.getUsers(sieve);
+            setUsers(result);
+        } catch (e) {
+            customcatch(e);
+        }
+    }
+
+    async function editUser(dto: UpdateUserRequestDto) {
+        try {
+            const result = await userClient.updateUser(dto);
+            const index = users.findIndex(u => u.userId === result.userId);
+
+            if (index > -1) {
+                const duplicate = [...users];
+                duplicate[index] = result;
+                setUsers(duplicate);
+                toast.success("Update successful!");
+            }
+        } catch (e) {
+            customcatch(e);
+        }
+    }
+
+    async function deleteUser(userId: string) {
+        try {
+            await userClient.deleteUser(userId);
+
+            setUsers(prev =>
+                prev.map(u =>
+                    u.userId === userId ? { ...u, isActive: false } : u
+                )
+            );
+
+            toast.success("User deactivated!");
+        } catch (e) {
+            customcatch(e);
+        }
+    }
+
     async function logoutUser() {
         setAccessToken(null);
         setRefreshToken(null);
@@ -68,6 +117,9 @@ export default function useJerneCrud() {
     return {
         loginUser,
         logoutUser,
-        registerUser
+        registerUser,
+        getAllUsers,
+        deleteUser,
+        editUser
     }
 }

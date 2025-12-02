@@ -33,8 +33,8 @@ public class UserController : BaseController
     
     [Authorize(Roles = "Admin")]
     [HttpPut(nameof(DeleteUser))]
-    public async Task<UserDto> DeleteUser()
+    public async Task<UserDto> DeleteUser([FromBody] string userId)
     {
-        return await _userService.DeleteUser(CurrentUserId);
+        return await _userService.DeleteUser(userId);
     }
 }

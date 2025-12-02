@@ -280,26 +280,6 @@
         }
       }
     },
-    "/GetActiveGame": {
-      "get": {
-        "tags": [
-          "Game"
-        ],
-        "operationId": "Game_GetActiveGame",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GameDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/GetGameWinningNumbersForGame": {
       "get": {
         "tags": [
@@ -601,6 +581,18 @@
           "User"
         ],
         "operationId": "User_DeleteUser",
+        "requestBody": {
+          "x-name": "userId",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
         "responses": {
           "200": {
             "description": "",
@@ -800,15 +792,10 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "gameId",
           "isRepeating",
           "boardNumbers"
         ],
         "properties": {
-          "gameId": {
-            "type": "string",
-            "minLength": 3
-          },
           "isRepeating": {
             "type": "boolean"
           },
@@ -888,14 +875,9 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "gameId",
           "gameWinningNumbers"
         ],
         "properties": {
-          "gameId": {
-            "type": "string",
-            "minLength": 3
-          },
           "gameWinningNumbers": {
             "type": "array",
             "maxItems": 3,
@@ -987,9 +969,7 @@
           "userId",
           "fullName",
           "phoneNumber",
-          "email",
-          "currentPassword",
-          "newPassword"
+          "email"
         ],
         "properties": {
           "userId": {
@@ -1008,13 +988,21 @@
             "type": "string",
             "minLength": 3
           },
+          "role": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "nullable": true
+          },
           "currentPassword": {
             "type": "string",
-            "minLength": 6
+            "nullable": true
           },
           "newPassword": {
             "type": "string",
-            "minLength": 6
+            "nullable": true
           }
         }
       }

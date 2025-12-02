@@ -7,6 +7,7 @@ import LoginPage from "../pages/LoginPage.tsx";
 import Game from "../pages/player/Game.tsx";
 import UsersList from "../pages/admin/UsersList.tsx";
 import AddUser from "../pages/admin/AddUser.tsx";
+import EditUser from "../pages/admin/EditUser.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -36,6 +37,10 @@ export const router = createBrowserRouter([
             {
                 path: "adduser",
                 element: <AddUser />
+            },
+            {
+                path: "edituser/:userId",
+                element: <EditUser />
             }
         ]
     },

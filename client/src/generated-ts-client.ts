@@ -730,13 +730,17 @@ export class UserClient {
         return Promise.resolve<UserDto>(null as any);
     }
 
-    deleteUser(): Promise<UserDto> {
+    deleteUser(userId: string): Promise<UserDto> {
         let url_ = this.baseUrl + "/DeleteUser";
         url_ = url_.replace(/[?&]$/, "");
 
+        const content_ = JSON.stringify(userId);
+
         let options_: RequestInit = {
+            body: content_,
             method: "PUT",
             headers: {
+                "Content-Type": "application/json",
                 "Accept": "application/json"
             }
         };
@@ -870,8 +874,10 @@ export interface UpdateUserRequestDto {
     fullName: string;
     phoneNumber: string;
     email: string;
-    currentPassword: string;
-    newPassword: string;
+    role: string | undefined;
+    isActive: boolean | undefined;
+    currentPassword: string | undefined;
+    newPassword: string | undefined;
 }
 
 export class ApiException extends Error {
