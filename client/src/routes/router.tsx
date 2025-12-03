@@ -8,6 +8,7 @@ import Game from "../pages/player/Game.tsx";
 import UsersList from "../pages/admin/UsersList.tsx";
 import AddUser from "../pages/admin/AddUser.tsx";
 import EditUser from "../pages/admin/EditUser.tsx";
+import AddTransaction from "../pages/player/AddTransaction.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -41,7 +42,11 @@ export const router = createBrowserRouter([
             {
                 path: "edituser/:userId",
                 element: <EditUser />
-            }
+            },
+            {
+                path: "addtransaction",
+                element: <AddTransaction />
+            },
         ]
     },
     {

@@ -7,14 +7,15 @@ import {
     UserClient,
     type LoginRequestDto,
     type RegisterRequestDto,
-    type UpdateUserRequestDto,
+    type UpdateUserRequestDto, type CreateTransactionRequestDto, TransactionClient,
 } from "../generated-ts-client.ts";
-import {loggedInUserAtom, accessTokenAtom, refreshTokenAtom, usersAtom} from "../atoms/jerneAtom.ts";
+import {loggedInUserAtom, accessTokenAtom, refreshTokenAtom, usersAtom, transactionsAtom} from "../atoms/jerneAtom.ts";
 import {useNavigate} from "react-router";
 import {customFetch} from "./customFetch.ts";
 
 const authClient = new AuthClient(finalUrl);
 const userClient = new UserClient(finalUrl, customFetch);
+const transactionClient = new TransactionClient(finalUrl, customFetch);
 
 export default function useJerneCrud() {
     const navigate = useNavigate();
@@ -23,6 +24,8 @@ export default function useJerneCrud() {
     const [loggedInUser, setLoggedInUser] = useAtom(loggedInUserAtom);
     const [accessToken, setAccessToken] = useAtom(accessTokenAtom);
     const [refreshToken, setRefreshToken] = useAtom(accessTokenAtom);
+
+    const [transactions, setTransactions] = useAtom(transactionsAtom);
 
     async function loginUser(dto : LoginRequestDto) {
         try {
@@ -114,12 +117,25 @@ export default function useJerneCrud() {
         navigate("/login");
     }
 
+    async function addTransaction(dto: CreateTransactionRequestDto) {
+        try {
+            const result = await transactionClient.createTransaction(dto);
+            const duplicate = [...transactions];
+            duplicate.push(result);
+            setTransactions(duplicate);
+            toast.success("Transaction request sent!");
+        } catch (e) {
+            customcatch(e);
+        }
+    }
+
     return {
         loginUser,
         logoutUser,
         registerUser,
         getAllUsers,
         deleteUser,
-        editUser
+        editUser,
+        addTransaction
     }
 }
