@@ -858,6 +858,7 @@ export interface TransactionDto {
     createdAt: string;
     approvedAt: string | undefined;
     deletedAt: string | undefined;
+    userFullName: string;
 }
 
 export interface CreateTransactionRequestDto {

@@ -65,7 +65,7 @@ export default function UsersList() {
                     <input className="btn" type="radio" name="frameworks" aria-label="Inactive" onClick={() => setActive("false")}/>
                 </form>
             </div>
-            <table className="table">
+            <table className="table mb-4">
                 {/* head */}
                 <thead>
                 <tr>
@@ -107,9 +107,9 @@ export default function UsersList() {
                 })}
                 </tbody>
             </table>
-            <div className="join grid grid-cols-2">
+            <div className="join grid grid-cols-2 gap-4">
                 <button className="join-item btn btn-outline" onClick={() => setPage(page - 1)} disabled={page === 1}>Previous page</button>
-                <button className="join-item btn btn-outline" onClick={() => setPage(page + 1)}>Next</button>
+                <button className="join-item btn btn-outline" onClick={() => setPage(page + 1)}>Next page</button>
             </div>
         </div>
     )

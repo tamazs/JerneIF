@@ -129,6 +129,15 @@ export default function useJerneCrud() {
         }
     }
 
+    async function getTransactions(sieve: any) {
+        try {
+            const result = await transactionClient.getTransactions(sieve);
+            setTransactions(result);
+        } catch (e) {
+            customcatch(e);
+        }
+    }
+
     return {
         loginUser,
         logoutUser,
@@ -136,6 +145,7 @@ export default function useJerneCrud() {
         getAllUsers,
         deleteUser,
         editUser,
-        addTransaction
+        addTransaction,
+        getTransactions,
     }
 }
