@@ -33,14 +33,14 @@ public class TransactionController : BaseController
     
     [Authorize(Roles = "Admin")]
     [HttpPut(nameof(ApproveTransaction))]
-    public async Task<TransactionDto> ApproveTransaction([FromBody]ApproveTransactionRequestDto dto) {
-        return await _transactionService.ApproveTransaction(CurrentUserId, dto);
+    public async Task<TransactionDto> ApproveTransaction([FromBody]string transactionId) {
+        return await _transactionService.ApproveTransaction(CurrentUserId, transactionId);
     }
     
     [Authorize(Roles = "Admin")]
     [HttpPut(nameof(DenyTransaction))]
-    public async Task<TransactionDto> DenyTransaction([FromBody]ApproveTransactionRequestDto dto) {
-        return await _transactionService.DenyTransaction(CurrentUserId, dto);
+    public async Task<TransactionDto> DenyTransaction([FromBody]string transactionId) {
+        return await _transactionService.DenyTransaction(CurrentUserId, transactionId);
     }
 
     [Authorize]

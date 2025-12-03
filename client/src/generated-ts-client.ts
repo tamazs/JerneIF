@@ -534,11 +534,11 @@ export class TransactionClient {
         return Promise.resolve<TransactionDto[]>(null as any);
     }
 
-    approveTransaction(dto: ApproveTransactionRequestDto): Promise<TransactionDto> {
+    approveTransaction(transactionId: string): Promise<TransactionDto> {
         let url_ = this.baseUrl + "/ApproveTransaction";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(dto);
+        const content_ = JSON.stringify(transactionId);
 
         let options_: RequestInit = {
             body: content_,
@@ -571,11 +571,11 @@ export class TransactionClient {
         return Promise.resolve<TransactionDto>(null as any);
     }
 
-    denyTransaction(dto: ApproveTransactionRequestDto): Promise<TransactionDto> {
+    denyTransaction(transactionId: string): Promise<TransactionDto> {
         let url_ = this.baseUrl + "/DenyTransaction";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(dto);
+        const content_ = JSON.stringify(transactionId);
 
         let options_: RequestInit = {
             body: content_,
@@ -864,10 +864,6 @@ export interface TransactionDto {
 export interface CreateTransactionRequestDto {
     mobilePayReference: string;
     amount: number;
-}
-
-export interface ApproveTransactionRequestDto {
-    transactionId: string;
 }
 
 export interface UpdateUserRequestDto {

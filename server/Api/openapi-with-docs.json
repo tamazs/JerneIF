@@ -416,11 +416,11 @@
         ],
         "operationId": "Transaction_ApproveTransaction",
         "requestBody": {
-          "x-name": "dto",
+          "x-name": "transactionId",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ApproveTransactionRequestDto"
+                "type": "string"
               }
             }
           },
@@ -448,11 +448,11 @@
         ],
         "operationId": "Transaction_DenyTransaction",
         "requestBody": {
-          "x-name": "dto",
+          "x-name": "transactionId",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ApproveTransactionRequestDto"
+                "type": "string"
               }
             }
           },
@@ -927,6 +927,9 @@
             "type": "string",
             "format": "date-time",
             "nullable": true
+          },
+          "userFullName": {
+            "type": "string"
           }
         }
       },
@@ -946,19 +949,6 @@
             "type": "number",
             "format": "decimal",
             "minimum": 0.01
-          }
-        }
-      },
-      "ApproveTransactionRequestDto": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "transactionId"
-        ],
-        "properties": {
-          "transactionId": {
-            "type": "string",
-            "minLength": 3
           }
         }
       },

@@ -105,8 +105,8 @@ export default function TransactionsPage() {
                                         </svg>
                                         </div>
                                         <ul tabIndex={-1} className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
-                                            <li><a >Approve Transaction</a></li>
-                                            <li><a >Reject Transaction</a></li>
+                                            <li><a onClick={() => jerneCrud.approveTransaction(transaction.transactionId)}>Approve Transaction</a></li>
+                                            <li><a onClick={() => jerneCrud.rejectTransaction(transaction.transactionId)}>Reject Transaction</a></li>
                                         </ul>
                                     </div>
                                 )}

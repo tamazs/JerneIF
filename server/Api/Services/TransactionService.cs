@@ -12,7 +12,7 @@ public class TransactionService(JerneDbContext dbContext, ISieveProcessor sieveP
 {
     public async Task<List<TransactionDto>> GetTransactions(SieveModel sieveModel)
     {
-        IQueryable<Transaction> transactions = dbContext.Transactions;
+        IQueryable<Transaction> transactions = dbContext.Transactions.Include(t => t.User);
         
         transactions = sieveProcessor.Apply(sieveModel, transactions);
         
@@ -44,12 +44,19 @@ public class TransactionService(JerneDbContext dbContext, ISieveProcessor sieveP
         
         await dbContext.Transactions.AddAsync(transaction);
         await dbContext.SaveChangesAsync();
-        return new TransactionDto(transaction);
+        
+        //reloading to fix  Object reference not set to an instance of an object.
+        //because of fullName of user attached for search from client
+        var loaded = await dbContext.Transactions
+            .Include(t => t.User)
+            .FirstOrDefaultAsync(t => t.TransactionId == transaction.TransactionId);
+
+        return new TransactionDto(loaded);
     }
 
-    public async Task<TransactionDto> ApproveTransaction(string userId, ApproveTransactionRequestDto dto)
+    public async Task<TransactionDto> ApproveTransaction(string userId, string transactionId)
     {
-        var transaction = await dbContext.Transactions.FirstOrDefaultAsync(t => t.TransactionId == dto.TransactionId);
+        var transaction = await dbContext.Transactions.Include(t => t.User).FirstOrDefaultAsync(t => t.TransactionId == transactionId);
         if (transaction == null)  throw new KeyNotFoundException("Transaction not found.");
         transaction.Status = TransactionStatus.Approved.ToString();
         transaction.ApprovedByUserId = userId;
@@ -58,9 +65,9 @@ public class TransactionService(JerneDbContext dbContext, ISieveProcessor sieveP
         return new TransactionDto(transaction);
     }
 
-    public async Task<TransactionDto> DenyTransaction(string userId, ApproveTransactionRequestDto dto)
+    public async Task<TransactionDto> DenyTransaction(string userId, string transactionId)
     {
-        var transaction = await dbContext.Transactions.FirstOrDefaultAsync(t => t.TransactionId == dto.TransactionId);
+        var transaction = await dbContext.Transactions.Include(t => t.User).FirstOrDefaultAsync(t => t.TransactionId == transactionId);
         if (transaction == null)  throw new KeyNotFoundException("Transaction not found.");
         transaction.Status = TransactionStatus.Rejected.ToString();
         transaction.ApprovedByUserId = userId;

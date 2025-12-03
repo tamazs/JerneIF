@@ -15,6 +15,7 @@ public class TransactionDto
         CreatedAt = transaction.CreatedAt;
         ApprovedAt = transaction.ApprovedAt;
         DeletedAt = transaction.DeletedAt;
+        UserFullName = transaction.User.FullName;
     }
     
     public string TransactionId { get; set; } = null!;
@@ -34,4 +35,6 @@ public class TransactionDto
     public DateTime? ApprovedAt { get; set; }
 
     public DateTime? DeletedAt { get; set; }
+    
+    public string UserFullName { get; set; } = null!;
 }

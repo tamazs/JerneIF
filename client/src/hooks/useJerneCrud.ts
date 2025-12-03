@@ -23,7 +23,7 @@ export default function useJerneCrud() {
     const [users, setUsers] = useAtom(usersAtom);
     const [loggedInUser, setLoggedInUser] = useAtom(loggedInUserAtom);
     const [accessToken, setAccessToken] = useAtom(accessTokenAtom);
-    const [refreshToken, setRefreshToken] = useAtom(accessTokenAtom);
+    const [refreshToken, setRefreshToken] = useAtom(refreshTokenAtom);
 
     const [transactions, setTransactions] = useAtom(transactionsAtom);
 
@@ -138,6 +138,36 @@ export default function useJerneCrud() {
         }
     }
 
+    async function approveTransaction(transactionId: string) {
+        try {
+            await transactionClient.approveTransaction(transactionId);
+            setTransactions(prev =>
+                prev.map(t =>
+                    t.transactionId === transactionId ? { ...t, status: "Approved" } : t
+                )
+            );
+
+            toast.success("Transaction approved!");
+        } catch (e) {
+            customcatch(e);
+        }
+    }
+
+    async function rejectTransaction(transactionId: string) {
+        try {
+            await transactionClient.denyTransaction(transactionId);
+            setTransactions(prev =>
+                prev.map(t =>
+                    t.transactionId === transactionId ? { ...t, status: "Rejected" } : t
+                )
+            );
+
+            toast.success("Transaction rejected!");
+        } catch (e) {
+            customcatch(e);
+        }
+    }
+
     return {
         loginUser,
         logoutUser,
@@ -147,5 +177,7 @@ export default function useJerneCrud() {
         editUser,
         addTransaction,
         getTransactions,
+        approveTransaction,
+        rejectTransaction,
     }
 }
