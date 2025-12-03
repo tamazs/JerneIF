@@ -62,6 +62,7 @@ public class Program
         services.AddScoped<IBoardService, BoardService>();
         services.AddScoped<BalanceHelper>();
         services.AddScoped<GameQueryHelper>();
+        services.AddScoped<ISieveConfiguration, SieveConfiguration>();
         
         services.AddProblemDetails();
         services.AddExceptionHandler<GlobalExceptionHandler>();

@@ -28,7 +28,7 @@ public class AuthService(JerneDbContext dbContext, IConfiguration configuration)
             PhoneNumber = dto.PhoneNumber,
             Email = dto.Email,
             Role = UserRole.Player.ToString(),
-            IsActive = true,
+            IsActive = false,
             CreatedAt = DateTime.UtcNow
         };
 
