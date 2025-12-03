@@ -9,7 +9,8 @@ import UsersList from "../pages/admin/UsersList.tsx";
 import AddUser from "../pages/admin/AddUser.tsx";
 import EditUser from "../pages/admin/EditUser.tsx";
 import AddTransaction from "../pages/player/AddTransaction.tsx";
-import TransactionsPage from "../pages/TransactionsPage.tsx";
+import TransactionsPage from "../pages/admin/TransactionsPage.tsx";
+import UserTransactionsPage from "../pages/player/UserTransactionsPage.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -20,43 +21,79 @@ export const router = createBrowserRouter([
             </ProtectedRoute>
         ),
         children: [
+
             {
                 index: true,
                 element: <PlayerDashboard />
             },
+
             {
                 path: "admin",
-                element: <AdminDashboard />
-            },
-            {
-                path: "game",
-                element: <Game />
+                element: (
+                    <ProtectedRoute role="Admin">
+                        <AdminDashboard />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: "userslist",
-                element: <UsersList />
+                element: (
+                    <ProtectedRoute role="Admin">
+                        <UsersList />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: "adduser",
-                element: <AddUser />
+                element: (
+                    <ProtectedRoute role="Admin">
+                        <AddUser />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: "edituser/:userId",
-                element: <EditUser />
-            },
-            {
-                path: "addtransaction",
-                element: <AddTransaction />
+                element: (
+                    <ProtectedRoute role="Admin">
+                        <EditUser />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: "transactions",
-                element: <TransactionsPage />
+                element: (
+                    <ProtectedRoute role="Admin">
+                        <TransactionsPage />
+                    </ProtectedRoute>
+                )
+            },
+
+            {
+                path: "addtransaction",
+                element: (
+                    <ProtectedRoute role="Player">
+                        <AddTransaction />
+                    </ProtectedRoute>
+                )
+            },
+            {
+                path: "mytransactions",
+                element: (
+                    <ProtectedRoute role="Player">
+                        <UserTransactionsPage />
+                    </ProtectedRoute>
+                )
+            },
+
+            {
+                path: "game",
+                element: <Game />
             }
         ]
     },
+
     {
         path: "/login",
         element: <LoginPage />
     },
-    ]
-);
+]);

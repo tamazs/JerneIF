@@ -2,7 +2,7 @@ import {atom} from "jotai";
 
 import type {TransactionDto, UserDto} from "../generated-ts-client.ts";
 
-export const loggedInUserAtom = atom<UserDto | null>(null);
+export const loggedInUserAtom = atom<UserDto | null>(JSON.parse(localStorage.getItem("user") || "null"));
 export const usersAtom = atom<UserDto[]>([]);
 export const transactionsAtom = atom<TransactionDto[]>([]);
 

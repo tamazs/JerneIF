@@ -1,14 +1,13 @@
 import {useEffect, useState} from "react";
-import useJerneCrud from "../hooks/useJerneCrud.ts";
+import useJerneCrud from "../../hooks/useJerneCrud.ts";
 import {useAtom} from "jotai";
 import {useNavigate} from "react-router";
-import {transactionsAtom} from "../atoms/jerneAtom.ts";
+import {transactionsAtom} from "../../atoms/jerneAtom.ts";
 
 export default function TransactionsPage() {
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState("");
     const [page, setPage] = useState(1);
-    const navigate = useNavigate();
 
     const [transactions] = useAtom(transactionsAtom);
 

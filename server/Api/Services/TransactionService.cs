@@ -21,7 +21,7 @@ public class TransactionService(JerneDbContext dbContext, ISieveProcessor sieveP
 
     public async Task<List<TransactionDto>> GetTransactionsByUserId(string userId, SieveModel sieveModel)
     {
-        IQueryable<Transaction> transactions = dbContext.Transactions.Where(t => t.UserId == userId);
+        IQueryable<Transaction> transactions = dbContext.Transactions.Include(t => t.User).Where(t => t.UserId == userId);
         
         transactions = sieveProcessor.Apply(sieveModel, transactions);
         

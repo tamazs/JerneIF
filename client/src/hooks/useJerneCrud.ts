@@ -57,6 +57,7 @@ export default function useJerneCrud() {
             duplicate.push(result);
             setUsers(duplicate);
             toast.success("Register successful!");
+            navigate(-1);
             return result;
         }
         catch (e) {
@@ -83,6 +84,7 @@ export default function useJerneCrud() {
                 duplicate[index] = result;
                 setUsers(duplicate);
                 toast.success("Update successful!");
+                navigate(-1);
             }
         } catch (e) {
             customcatch(e);
@@ -123,6 +125,7 @@ export default function useJerneCrud() {
             const duplicate = [...transactions];
             duplicate.push(result);
             setTransactions(duplicate);
+            navigate(-1);
             toast.success("Transaction request sent!");
         } catch (e) {
             customcatch(e);
@@ -132,6 +135,15 @@ export default function useJerneCrud() {
     async function getTransactions(sieve: any) {
         try {
             const result = await transactionClient.getTransactions(sieve);
+            setTransactions(result);
+        } catch (e) {
+            customcatch(e);
+        }
+    }
+
+    async function getTransactionsForPlayer(sieve: any) {
+        try {
+            const result = await transactionClient.getTransactionsByUserId(sieve);
             setTransactions(result);
         } catch (e) {
             customcatch(e);
@@ -179,5 +191,6 @@ export default function useJerneCrud() {
         getTransactions,
         approveTransaction,
         rejectTransaction,
+        getTransactionsForPlayer
     }
 }

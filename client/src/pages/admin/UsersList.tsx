@@ -37,8 +37,8 @@ export default function UsersList() {
 
 
     return (
-        <div className="overflow-x-auto flex flex-col items-center">
-            <label className="input mb-3">
+        <div className="overflow-x-auto flex flex-col ">
+            <label className="input mb-3 self-center">
                 <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <g
                         strokeLinejoin="round"
@@ -53,17 +53,22 @@ export default function UsersList() {
                 </svg>
                 <input type="search" required placeholder="Search" onChange={(e) => setSearch(e.target.value)} />
             </label>
-            <div className="flex w-full justify-start items-center gap-12 mb-4">
-                <form className="filter">
-                    <input className="btn btn-square" type="reset" value="×" onClick={() => setRole("")}/>
-                    <input className="btn" type="radio" name="frameworks" aria-label="Admin" onClick={() => setRole("Admin")}/>
-                    <input className="btn" type="radio" name="frameworks" aria-label="Player" onClick={() => setRole("Player")}/>
-                </form>
-                <form className="filter">
-                    <input className="btn btn-square" type="reset" value="×" onClick={() => setActive("")}/>
-                    <input className="btn" type="radio" name="frameworks" aria-label="Active" onClick={() => setActive("true")}/>
-                    <input className="btn" type="radio" name="frameworks" aria-label="Inactive" onClick={() => setActive("false")}/>
-                </form>
+            <div className="flex justify-center">
+                <div className="flex w-full justify-start items-center gap-12 mb-4">
+                    <form className="filter">
+                        <input className="btn btn-square" type="reset" value="×" onClick={() => setRole("")}/>
+                        <input className="btn" type="radio" name="frameworks" aria-label="Admin" onClick={() => setRole("Admin")}/>
+                        <input className="btn" type="radio" name="frameworks" aria-label="Player" onClick={() => setRole("Player")}/>
+                    </form>
+                    <form className="filter">
+                        <input className="btn btn-square" type="reset" value="×" onClick={() => setActive("")}/>
+                        <input className="btn" type="radio" name="frameworks" aria-label="Active" onClick={() => setActive("true")}/>
+                        <input className="btn" type="radio" name="frameworks" aria-label="Inactive" onClick={() => setActive("false")}/>
+                    </form>
+                </div>
+                <div>
+                    <button className="btn btn-primary" onClick={() => navigate("/adduser")}>Add User</button>
+                </div>
             </div>
             <table className="table mb-4">
                 {/* head */}
@@ -107,7 +112,7 @@ export default function UsersList() {
                 })}
                 </tbody>
             </table>
-            <div className="join grid grid-cols-2 gap-4">
+            <div className="join grid grid-cols-2 gap-4 self-center">
                 <button className="join-item btn btn-outline" onClick={() => setPage(page - 1)} disabled={page === 1}>Previous page</button>
                 <button className="join-item btn btn-outline" onClick={() => setPage(page + 1)}>Next page</button>
             </div>

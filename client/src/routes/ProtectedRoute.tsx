@@ -1,10 +1,27 @@
 import { Navigate } from "react-router";
+import { useAtom } from "jotai";
+import { loggedInUserAtom } from "../atoms/jerneAtom";
+import type {JSX} from "react";
 
-// @ts-ignore
-export default function ProtectedRoute({ children }) {
-    const token = localStorage.getItem("accessToken");
+export default function ProtectedRoute({
+                                           children,
+                                           role
+                                       }: {
+    children: JSX.Element;
+    role?: string;
+}) {
 
-    if (!token) return <Navigate to="/login" replace />;
+    const [loggedInUser] = useAtom(loggedInUserAtom);
+
+    // Not logged in
+    if (!loggedInUser) {
+        return <Navigate to="/login" replace />;
+    }
+
+    // Role restricted
+    if (role && loggedInUser.role !== role) {
+        return <Navigate to="/" replace />;
+    }
 
     return children;
 }
