@@ -4,6 +4,9 @@ namespace Api.DTOs;
 
 public class UserDto
 {
+    public UserDto()
+    {}
+    
     public UserDto(User user)
     {
         UserId =  user.UserId;

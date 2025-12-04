@@ -12,6 +12,8 @@ import AddTransaction from "../pages/player/AddTransaction.tsx";
 import TransactionsPage from "../pages/admin/TransactionsPage.tsx";
 import UserTransactionsPage from "../pages/player/UserTransactionsPage.tsx";
 import PlayerBoardList from "../pages/player/PlayerBoardList.tsx";
+import AdminGame from "../pages/admin/AdminGame.tsx";
+import GamesList from "../pages/admin/GamesList.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -99,6 +101,22 @@ export const router = createBrowserRouter([
                 element: (
                     <ProtectedRoute >
                         <PlayerGame />
+                    </ProtectedRoute>
+                )
+            },
+            {
+                path: "addgamewinningnumbers",
+                element: (
+                    <ProtectedRoute >
+                        <AdminGame />
+                    </ProtectedRoute>
+                )
+            },
+            {
+                path: "games",
+                element: (
+                    <ProtectedRoute >
+                        <GamesList />
                     </ProtectedRoute>
                 )
             }

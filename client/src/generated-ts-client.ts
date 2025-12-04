@@ -836,6 +836,14 @@ export interface GameDto {
     publishedByUserId: string | undefined;
     createdAt: string;
     deletedAt: string | undefined;
+    gameWinningNumber: number[] | undefined;
+    publishedByUser: UserDto | undefined;
+    winners: GameWinnerDto[] | undefined;
+}
+
+export interface GameWinnerDto {
+    fullName: string;
+    matchedNumbers: number[];
 }
 
 export interface GameWinningNumbersDto {
