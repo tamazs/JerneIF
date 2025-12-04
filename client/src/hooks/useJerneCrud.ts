@@ -8,7 +8,7 @@ import {
     type LoginRequestDto,
     type RegisterRequestDto,
     type UpdateUserRequestDto, type CreateTransactionRequestDto, TransactionClient, type UserDto, BoardClient,
-    type AddBoardRequestDto,
+    type AddBoardRequestDto, GameClient, GameWinningNumberClient, type AddGameWinningNumbersDto,
 } from "../generated-ts-client.ts";
 import {
     loggedInUserAtom,
@@ -16,7 +16,7 @@ import {
     refreshTokenAtom,
     usersAtom,
     transactionsAtom,
-    balanceAtom, boardsAtom
+    balanceAtom, boardsAtom, gamesAtom
 } from "../atoms/jerneAtom.ts";
 import {useNavigate} from "react-router";
 import {customFetch} from "./customFetch.ts";
@@ -25,6 +25,8 @@ const authClient = new AuthClient(finalUrl);
 const userClient = new UserClient(finalUrl, customFetch);
 const transactionClient = new TransactionClient(finalUrl, customFetch);
 const boardClient = new BoardClient(finalUrl, customFetch);
+const gameClient = new GameClient(finalUrl, customFetch);
+const gameWinningNumbersClient = new GameWinningNumberClient(finalUrl, customFetch);
 
 export default function useJerneCrud() {
     const navigate = useNavigate();
@@ -35,6 +37,7 @@ export default function useJerneCrud() {
     const [refreshToken, setRefreshToken] = useAtom(refreshTokenAtom);
     const [balance, setBalance] = useAtom(balanceAtom);
     const [boards, setBoards] = useAtom(boardsAtom);
+    const [games, setGames] = useAtom(gamesAtom);
 
     const [transactions, setTransactions] = useAtom(transactionsAtom);
 
@@ -227,6 +230,25 @@ export default function useJerneCrud() {
         }
     }
 
+    async function getGames(sieve: any) {
+        try {
+            const result = await gameClient.getAllGames(sieve);
+            setGames(result);
+        } catch (e) {
+            customcatch(e);
+        }
+    }
+
+    async function addGameWinningNumbers(dto: AddGameWinningNumbersDto) {
+        try {
+            await gameWinningNumbersClient.addGameWinningNumbers(dto)
+            navigate(-1);
+            toast.success("Game winning numbers added successfully!");
+        } catch (e) {
+            customcatch(e);
+        }
+    }
+
     return {
         loginUser,
         logoutUser,
@@ -242,5 +264,7 @@ export default function useJerneCrud() {
         getBalance,
         addBoard,
         getPlayerBoards,
+        getGames,
+        addGameWinningNumbers
     }
 }

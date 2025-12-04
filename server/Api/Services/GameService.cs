@@ -12,7 +12,11 @@ public class GameService(JerneDbContext dbContext, ISieveProcessor sieveProcesso
 {
     public async Task<List<GameDto>> GetAllGames(SieveModel sieveModel)
     {
-        IQueryable<Game> games = dbContext.Games;
+        IQueryable<Game> games = dbContext.Games
+            .Include(g => g.PublishedByUser)
+            .Include(g => g.GameWinningNumber)
+            .Include(g => g.GameWinners)
+            .ThenInclude(gw => gw.User);
         
         games = sieveProcessor.Apply(sieveModel, games);
 
