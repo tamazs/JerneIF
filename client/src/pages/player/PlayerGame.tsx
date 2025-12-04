@@ -1,8 +1,18 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
+import useJerneCrud from "../../hooks/useJerneCrud.ts";
+import type {AddBoardRequestDto} from "../../generated-ts-client.ts";
 
-export default function Game() {
+export default function PlayerGame() {
+    const jerneCrud = useJerneCrud();
     const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
     const maxNumbers = 8;
+    const minNumbers = 5;
+
+    const [addBoard, setAddBoard] = useState<AddBoardRequestDto>({
+        isRepeating: false,
+        repeatCount: 0,
+        boardNumbers: selectedNumbers
+    })
 
     function toggleNumber(num: number) {
         if (selectedNumbers.includes(num)) {
@@ -14,27 +24,28 @@ export default function Game() {
     }
 
     async function handleSubmit() {
-        console.log("Submitting numbers:", selectedNumbers);
 
-        // example:
-        // await jerneCrud.submitBoard({ userId, numbers: selectedNumbers });
+        await jerneCrud.addBoard(addBoard);
 
-        alert("Board submitted!");
     }
 
     function handleReset() {
         setSelectedNumbers([]);
     }
 
+    useEffect(() => {
+        setAddBoard(prev => ({
+            ...prev,
+            boardNumbers: selectedNumbers
+        }));
+    }, [selectedNumbers]);
+
     return (
         <div className="min-h-screen flex flex-col items-center p-6 gap-6">
 
             <div className="text-center">
-                <h1 className="text-3xl font-bold">Weekly Game #42</h1>
+                <h1 className="text-3xl font-bold">Weekly Game</h1>
                 <p className="opacity-70">Submit before Saturday 17:00</p>
-                <p className="text-sm text-warning mt-1">
-                    ⏳ 3 days 12 hours remaining
-                </p>
             </div>
 
             <div className="w-full max-w-md bg-base-200 p-4 rounded-lg shadow">
@@ -82,7 +93,7 @@ export default function Game() {
 
             <button
                 className="btn btn-lg btn-success w-full max-w-md mt-6"
-                disabled={selectedNumbers.length === 0}
+                disabled={selectedNumbers.length < minNumbers}
                 onClick={handleSubmit}
             >
                 Submit Board
@@ -95,6 +106,21 @@ export default function Game() {
             >
                 Reset Board
             </button>
+
+            <label className="label mt-8">
+                <span className="label-text">Repeat for more games</span>
+            </label>
+            <input value={addBoard.repeatCount} type="number" className="input validator" required placeholder="Repeat for number of games"
+                   min="0" max="10"
+                   title="Must be between be 0 to 10" onChange={(e) => {
+                const value = Number.parseInt(e.target.value) || 0;
+
+                setAddBoard(prev => ({
+                    ...prev,
+                    repeatCount: value,
+                    isRepeating: value > 0
+                }));
+            }} />
         </div>
     );
 }

@@ -7,15 +7,24 @@ import {
     UserClient,
     type LoginRequestDto,
     type RegisterRequestDto,
-    type UpdateUserRequestDto, type CreateTransactionRequestDto, TransactionClient,
+    type UpdateUserRequestDto, type CreateTransactionRequestDto, TransactionClient, type UserDto, BoardClient,
+    type AddBoardRequestDto,
 } from "../generated-ts-client.ts";
-import {loggedInUserAtom, accessTokenAtom, refreshTokenAtom, usersAtom, transactionsAtom} from "../atoms/jerneAtom.ts";
+import {
+    loggedInUserAtom,
+    accessTokenAtom,
+    refreshTokenAtom,
+    usersAtom,
+    transactionsAtom,
+    balanceAtom, boardsAtom
+} from "../atoms/jerneAtom.ts";
 import {useNavigate} from "react-router";
 import {customFetch} from "./customFetch.ts";
 
 const authClient = new AuthClient(finalUrl);
 const userClient = new UserClient(finalUrl, customFetch);
 const transactionClient = new TransactionClient(finalUrl, customFetch);
+const boardClient = new BoardClient(finalUrl, customFetch);
 
 export default function useJerneCrud() {
     const navigate = useNavigate();
@@ -24,19 +33,23 @@ export default function useJerneCrud() {
     const [loggedInUser, setLoggedInUser] = useAtom(loggedInUserAtom);
     const [accessToken, setAccessToken] = useAtom(accessTokenAtom);
     const [refreshToken, setRefreshToken] = useAtom(refreshTokenAtom);
+    const [balance, setBalance] = useAtom(balanceAtom);
+    const [boards, setBoards] = useAtom(boardsAtom);
 
     const [transactions, setTransactions] = useAtom(transactionsAtom);
 
     async function loginUser(dto : LoginRequestDto) {
         try {
             const result = await authClient.loginUser(dto)
-            setLoggedInUser(result.user)
+            // @ts-ignore
+            setLoggedInUser(result.user ?? null)
             setAccessToken(result.token)
             setRefreshToken(result.refreshToken)
 
             localStorage.setItem("accessToken", result.token);
             localStorage.setItem("refreshToken", result.refreshToken);
             localStorage.setItem("user", JSON.stringify(result.user));
+            await getBalance();
 
             toast.success("Login successful!");
 
@@ -110,6 +123,7 @@ export default function useJerneCrud() {
     async function logoutUser() {
         setAccessToken(null);
         setRefreshToken(null);
+        // @ts-ignore
         setLoggedInUser(null);
 
         localStorage.removeItem("accessToken");
@@ -180,6 +194,39 @@ export default function useJerneCrud() {
         }
     }
 
+    async function getBalance() {
+        try {
+            const result = await boardClient.getBalance();
+            setBalance(result);
+        } catch (e) {
+            customcatch(e);
+        }
+    }
+
+    async function addBoard(dto: AddBoardRequestDto) {
+        try {
+            const result = await boardClient.createBoard(dto);
+            const duplicate = [...boards];
+            duplicate.push(result);
+            setBoards(duplicate);
+            navigate(-1);
+            await getBalance();
+            toast.success("Board added successfully!");
+        } catch (e) {
+            customcatch(e);
+        }
+    }
+
+    async function getPlayerBoards(sieve: any) {
+        try {
+            const result = await boardClient.getBoardsByUserId(sieve);
+            setBoards(result);
+            await getBalance();
+        } catch (e) {
+            customcatch(e);
+        }
+    }
+
     return {
         loginUser,
         logoutUser,
@@ -191,6 +238,9 @@ export default function useJerneCrud() {
         getTransactions,
         approveTransaction,
         rejectTransaction,
-        getTransactionsForPlayer
+        getTransactionsForPlayer,
+        getBalance,
+        addBoard,
+        getPlayerBoards,
     }
 }
