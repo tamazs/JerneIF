@@ -209,9 +209,19 @@ export default function useJerneCrud() {
             const duplicate = [...boards];
             duplicate.push(result);
             setBoards(duplicate);
-            //navigate(-1);
+            navigate(-1);
             await getBalance();
             toast.success("Board added successfully!");
+        } catch (e) {
+            customcatch(e);
+        }
+    }
+
+    async function getPlayerBoards(sieve: any) {
+        try {
+            const result = await boardClient.getBoardsByUserId(sieve);
+            setBoards(result);
+            await getBalance();
         } catch (e) {
             customcatch(e);
         }
@@ -231,5 +241,6 @@ export default function useJerneCrud() {
         getTransactionsForPlayer,
         getBalance,
         addBoard,
+        getPlayerBoards,
     }
 }

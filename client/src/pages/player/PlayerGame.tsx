@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import useJerneCrud from "../../hooks/useJerneCrud.ts";
 import type {AddBoardRequestDto} from "../../generated-ts-client.ts";
 
-export default function Game() {
+export default function PlayerGame() {
     const jerneCrud = useJerneCrud();
     const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
     const maxNumbers = 8;

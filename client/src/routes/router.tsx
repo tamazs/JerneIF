@@ -1,16 +1,17 @@
 import {createBrowserRouter} from "react-router";
 import Layout from "../layout/Layout.tsx";
 import ProtectedRoute from "./ProtectedRoute.tsx";
-import PlayerDashboard from "../pages/admin/PlayerDashboard.tsx";
-import AdminDashboard from "../pages/player/AdminDashboard.tsx";
+import PlayerDashboard from "../pages/player/PlayerDashboard.tsx";
+import AdminDashboard from "../pages/admin/AdminDashboard.tsx";
 import LoginPage from "../pages/LoginPage.tsx";
-import Game from "../pages/player/Game.tsx";
+import PlayerGame from "../pages/player/PlayerGame.tsx";
 import UsersList from "../pages/admin/UsersList.tsx";
 import AddUser from "../pages/admin/AddUser.tsx";
 import EditUser from "../pages/admin/EditUser.tsx";
 import AddTransaction from "../pages/player/AddTransaction.tsx";
 import TransactionsPage from "../pages/admin/TransactionsPage.tsx";
 import UserTransactionsPage from "../pages/player/UserTransactionsPage.tsx";
+import PlayerBoardList from "../pages/player/PlayerBoardList.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -84,10 +85,22 @@ export const router = createBrowserRouter([
                     </ProtectedRoute>
                 )
             },
+            {
+                path: "myboards",
+                element: (
+                    <ProtectedRoute >
+                        <PlayerBoardList />
+                    </ProtectedRoute>
+                )
+            },
 
             {
-                path: "game",
-                element: <Game />
+                path: "addboard",
+                element: (
+                    <ProtectedRoute >
+                        <PlayerGame />
+                    </ProtectedRoute>
+                )
             }
         ]
     },
