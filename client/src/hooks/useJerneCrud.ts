@@ -123,6 +123,15 @@ export default function useJerneCrud() {
         }
     }
 
+    async function getUserById(userId: string) {
+        try {
+            const result = await userClient.getUserById(userId);
+            return result;
+        } catch (e) {
+            customcatch(e);
+        }
+    }
+
     async function logoutUser() {
         setAccessToken(null);
         setRefreshToken(null);
@@ -265,6 +274,7 @@ export default function useJerneCrud() {
         addBoard,
         getPlayerBoards,
         getGames,
-        addGameWinningNumbers
+        addGameWinningNumbers,
+        getUserById
     }
 }

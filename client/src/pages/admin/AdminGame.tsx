@@ -54,7 +54,7 @@ export default function AdminGame() {
                         {selectedNumbers.map(n => (
                             <span
                                 key={n}
-                                className="px-3 py-1 bg-primary text-primary-content rounded-lg"
+                                className="px-3 py-1 bg-secondary text-primary rounded-lg"
                             >
                                 {n}
                             </span>
@@ -77,7 +77,7 @@ export default function AdminGame() {
                             onClick={() => toggleNumber(num)}
                             className={`btn btn-xl ${
                                 isSelected
-                                    ? "btn-primary text-white"
+                                    ? "bg-secondary text-primary"
                                     : "btn-outline"
                             }`}
                         >

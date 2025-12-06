@@ -91,7 +91,7 @@ export default function UsersList() {
                             <td>{user.email}</td>
                             <td>{user.role}</td>
                             <td>
-                                {user.isActive ? <div className="badge badge-secondary">Active</div> : <div className="badge badge-error">Inactive</div>}
+                                {user.isActive ? <div className="badge badge-success">Active</div> : <div className="badge badge-error">Inactive</div>}
                             </td>
                             <td>
                                 <div className="dropdown dropdown-left">

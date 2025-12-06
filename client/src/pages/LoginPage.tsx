@@ -2,6 +2,8 @@ import { useState } from "react";
 import type {LoginRequestDto} from "../generated-ts-client.ts";
 import useJerneCrud from "../hooks/useJerneCrud.ts";
 
+import logo from "../../public/logo.png";
+
 export default function LoginPage() {
     const jerneCrud = useJerneCrud();
     const [loginForm, setLoginForm] = useState<LoginRequestDto>({
@@ -15,8 +17,9 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center">
-            <div className="w-full max-w-sm p-8 rounded-xl shadow-lg">
+        <div className="min-h-screen flex flex-col items-center justify-center gap-8">
+            <img src={logo} alt="logo" />
+            <div className="w-full max-w-sm p-8 rounded-xl shadow-lg bg-primary">
                 <h1 className="text-2xl font-bold text-center mb-6">
                     Login
                 </h1>
@@ -49,7 +52,7 @@ export default function LoginPage() {
 
                     <button
                         type="submit"
-                        className="btn w-full rounded-lg"
+                        className="btn btn-secondary w-full rounded-lg"
                     >
                         Log In
                     </button>

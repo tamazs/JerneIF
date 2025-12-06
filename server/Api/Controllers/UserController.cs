@@ -25,6 +25,13 @@ public class UserController : BaseController
     }
 
     [Authorize]
+    [HttpGet(nameof(GetUserById))]
+    public async Task<UserDto> GetUserById(string userId)
+    {
+        return await _userService.GetUserById(userId);
+    }
+
+    [Authorize]
     [HttpPut(nameof(UpdateUser))]
     public async Task<UserDto> UpdateUser([FromBody] UpdateUserRequestDto dto)
     {

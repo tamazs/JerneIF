@@ -20,6 +20,13 @@ public class UserService (JerneDbContext dbContext, ISieveProcessor sieveProcess
         return await users.Select(u => new UserDto(u)).ToListAsync();
     }
 
+    public async Task<UserDto> GetUserById(string userId)
+    {
+        var  user = await dbContext.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+        if (user == null) throw new KeyNotFoundException("User not found.");
+        return new UserDto(user);
+    }
+
     public async Task<UserDto> UpdateUser(UpdateUserRequestDto dto)
     {
         Validator.ValidateObject(dto, new ValidationContext(dto), true);

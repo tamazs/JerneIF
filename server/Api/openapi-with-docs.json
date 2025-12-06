@@ -543,6 +543,36 @@
         }
       }
     },
+    "/GetUserById": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "operationId": "User_GetUserById",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/UpdateUser": {
       "put": {
         "tags": [

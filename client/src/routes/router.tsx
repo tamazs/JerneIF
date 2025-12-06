@@ -57,7 +57,7 @@ export const router = createBrowserRouter([
             {
                 path: "edituser/:userId",
                 element: (
-                    <ProtectedRoute role="Admin">
+                    <ProtectedRoute>
                         <EditUser />
                     </ProtectedRoute>
                 )

@@ -44,7 +44,7 @@ export default function AddTransaction() {
 
                     <button
                         type="submit"
-                        className="btn w-full rounded-lg"
+                        className="btn btn-secondary text-primary w-full rounded-lg"
                     >
                         Add Transaction
                     </button>
