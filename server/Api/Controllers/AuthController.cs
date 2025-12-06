@@ -28,11 +28,10 @@ public class AuthController : BaseController
     {
         return await _authService.LoginUser(dto);
     }
-
-    [Authorize]
+    
     [HttpPost(nameof(RefreshTokens))]
     public async Task<LoginUserDto> RefreshTokens([FromBody] RefreshTokenRequestDto dto)
     {
-        return await _authService.RefreshTokens(CurrentUserId, dto);
+        return await _authService.RefreshTokens(dto);
     }
 }

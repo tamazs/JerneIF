@@ -52,7 +52,7 @@ export default function LoginPage() {
 
                     <button
                         type="submit"
-                        className="btn btn-secondary w-full rounded-lg"
+                        className="btn btn-secondary text-primary w-full rounded-lg"
                     >
                         Log In
                     </button>

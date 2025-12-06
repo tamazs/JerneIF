@@ -61,12 +61,15 @@ public class AuthService(JerneDbContext dbContext, IConfiguration configuration)
         };
     }
 
-    public async Task<LoginUserDto> RefreshTokens(string userId, RefreshTokenRequestDto dto)
+    public async Task<LoginUserDto> RefreshTokens(RefreshTokenRequestDto dto)
     {
         Validator.ValidateObject(dto, new ValidationContext(dto), true);
         
-        var user = await ValidateRefreshToken(userId, dto.RefreshToken);
-        if (user == null) throw new UnauthorizedAccessException("Invalid refresh token");
+        var user = await dbContext.Users
+            .FirstOrDefaultAsync(x => x.RefreshToken == dto.RefreshToken);
+
+        if (user == null || user.RefreshTokenExpiresAt < DateTime.UtcNow)
+            throw new UnauthorizedAccessException("Invalid refresh token");
         
         var newAccessToken = CreateToken(user);
         var newRefreshToken = await GenerateAndSaveRefreshToken(user);
@@ -94,17 +97,6 @@ public class AuthService(JerneDbContext dbContext, IConfiguration configuration)
         user.RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(7);
         await dbContext.SaveChangesAsync();
         return refreshToken;
-    }
-
-    private async Task<User?> ValidateRefreshToken(string userId, string refreshToken)
-    {
-        var user = await dbContext.Users.FindAsync(userId);
-        if (user == null || !user.RefreshToken.Equals(refreshToken) || user.RefreshTokenExpiresAt < DateTime.UtcNow)
-        {
-            return null;
-        }
-        
-        return user;
     }
 
     private string CreateToken(User user)
