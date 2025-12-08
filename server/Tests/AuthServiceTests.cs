@@ -1,0 +1,270 @@
+﻿using System.ComponentModel.DataAnnotations;
+using Api.DTOs.Request;
+using Api.Services;
+using DataAccess;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
+namespace Tests;
+
+public class AuthServiceTests(IAuthService authService, JerneDbContext dbContext)
+{
+    private async Task ClearDatabase()
+    {
+        dbContext.Users.RemoveRange(dbContext.Users);
+        await dbContext.SaveChangesAsync();
+    }
+    
+    [Fact]
+    public async Task RegisterUser_ShouldCreateUser()
+    {
+        await ClearDatabase();
+
+        var dto = new RegisterRequestDto
+        {
+            FullName = "Test User",
+            Email = "user@test.com",
+            Password = "TestPassword123!",
+            PhoneNumber = "12345678"
+        };
+
+        var result = await authService.RegisterUser(dto);
+
+        Assert.NotNull(result);
+        Assert.Equal(dto.Email, result.Email);
+
+        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+        Assert.NotNull(user);
+        Assert.Equal("Player", user.Role);
+        Assert.False(user.IsActive);
+    }
+    
+    [Fact]
+    public async Task RegisterUser_ShouldThrow_WhenEmailAlreadyExists()
+    {
+        await ClearDatabase();
+
+        var dto = new RegisterRequestDto
+        {
+            FullName = "Duplicate User",
+            Email = "dupe@test.com",
+            Password = "StrongPass123!",
+            PhoneNumber = "11111111"
+        };
+
+        await authService.RegisterUser(dto);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            authService.RegisterUser(dto));
+    }
+
+    [Fact]
+    public async Task RegisterUser_ShouldThrow_WhenValidationFails()
+    {
+        await ClearDatabase();
+
+        var dto = new RegisterRequestDto
+        {
+            FullName = "",
+            Email = "",
+            Password = "123",
+            PhoneNumber = ""
+        };
+
+        await Assert.ThrowsAsync<ValidationException>(() =>
+            authService.RegisterUser(dto));
+    }
+    
+    [Fact]
+    public async Task LoginUser_ShouldReturnToken_WhenCredentialsAreValid()
+    {
+        await ClearDatabase();
+
+        // Arrange
+        var user = new User
+        {
+            UserId = Guid.NewGuid().ToString(),
+            FullName = "Active User",
+            Email = "login@test.com",
+            PhoneNumber = "22222222",
+            Role = "Player",
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        };
+        user.PasswordHash = new PasswordHasher<User>().HashPassword(user, "StrongPass123!");
+
+        await dbContext.Users.AddAsync(user);
+        await dbContext.SaveChangesAsync();
+
+        var dto = new LoginRequestDto
+        {
+            Email = "login@test.com",
+            Password = "StrongPass123!"
+        };
+
+        // Act
+        var result = await authService.LoginUser(dto);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotNull(result.Token);
+        Assert.NotNull(result.RefreshToken);
+        Assert.Equal(user.Email, result.User.Email);
+    }
+    
+    [Fact]
+    public async Task LoginUser_ShouldThrow_WhenPasswordIsWrong()
+    {
+        await ClearDatabase();
+
+        var user = new User
+        {
+            UserId = Guid.NewGuid().ToString(),
+            FullName = "Wrong Password",
+            Email = "wrongpass@test.com",
+            PhoneNumber = "33333333",
+            Role = "Player",
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        };
+        user.PasswordHash = new PasswordHasher<User>().HashPassword(user, "CorrectPass123!");
+
+        await dbContext.Users.AddAsync(user);
+        await dbContext.SaveChangesAsync();
+
+        var dto = new LoginRequestDto
+        {
+            Email = "wrongpass@test.com",
+            Password = "WrongPass!"
+        };
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+            authService.LoginUser(dto));
+    }
+
+    [Fact]
+    public async Task LoginUser_ShouldThrow_WhenUserIsInactive()
+    {
+        await ClearDatabase();
+
+        var user = new User
+        {
+            UserId = Guid.NewGuid().ToString(),
+            FullName = "Inactive User",
+            Email = "inactive@test.com",
+            PhoneNumber = "44444444",
+            Role = "Player",
+            IsActive = false,
+            CreatedAt = DateTime.UtcNow
+        };
+        user.PasswordHash = new PasswordHasher<User>().HashPassword(user, "StrongPass123!");
+
+        await dbContext.Users.AddAsync(user);
+        await dbContext.SaveChangesAsync();
+
+        var dto = new LoginRequestDto
+        {
+            Email = "inactive@test.com",
+            Password = "StrongPass123!"
+        };
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+            authService.LoginUser(dto));
+    }
+    
+    [Fact]
+    public async Task RefreshTokens_ShouldReturnNewAccessAndRefreshToken_WhenValid()
+    {
+        await ClearDatabase();
+        
+        var user = new User
+        {
+            UserId = Guid.NewGuid().ToString(),
+            FullName = "Token User",
+            Email = "refresh@test.com",
+            PhoneNumber = "55555555",
+            Role = "Player",
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow,
+            RefreshToken = "validtoken123",
+            RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(1)
+        };
+        user.PasswordHash = new PasswordHasher<User>().HashPassword(user, "StrongPass123!");
+
+        await dbContext.Users.AddAsync(user);
+        await dbContext.SaveChangesAsync();
+
+        var dto = new RefreshTokenRequestDto
+        {
+            RefreshToken = "validtoken123"
+        };
+        
+        var result = await authService.RefreshTokens(dto);
+        
+        Assert.NotNull(result);
+        Assert.NotEqual("validtoken123", result.RefreshToken);
+        Assert.NotNull(result.Token);
+    }
+
+    [Fact]
+    public async Task RefreshTokens_ShouldThrow_WhenTokenIsInvalid()
+    {
+        await ClearDatabase();
+
+        var user = new User
+        {
+            UserId = Guid.NewGuid().ToString(),
+            FullName = "Invalid Refresh",
+            Email = "invalidrefresh@test.com",
+            PhoneNumber = "66666666",
+            Role = "Player",
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow,
+            RefreshToken = "validtoken123",
+            RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(1)
+        };
+        user.PasswordHash = new PasswordHasher<User>().HashPassword(user, "StrongPass123!");
+
+        await dbContext.Users.AddAsync(user);
+        await dbContext.SaveChangesAsync();
+
+        var dto = new RefreshTokenRequestDto
+        {
+            RefreshToken = "WRONGTOKEN"
+        };
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+            authService.RefreshTokens(dto));
+    }
+
+    [Fact]
+    public async Task RefreshTokens_ShouldThrow_WhenTokenIsExpired()
+    {
+        await ClearDatabase();
+
+        var user = new User
+        {
+            UserId = Guid.NewGuid().ToString(),
+            FullName = "Expired Token",
+            Email = "expired@test.com",
+            PhoneNumber = "77777777",
+            Role = "Player",
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow,
+            RefreshToken = "expiredtoken123",
+            RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(-1)
+        };
+        user.PasswordHash = new PasswordHasher<User>().HashPassword(user, "StrongPass123!");
+
+        await dbContext.Users.AddAsync(user);
+        await dbContext.SaveChangesAsync();
+
+        var dto = new RefreshTokenRequestDto
+        {
+            RefreshToken = "expiredtoken123"
+        };
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+            authService.RefreshTokens(dto));
+    }
+}
