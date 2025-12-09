@@ -4,17 +4,29 @@ using Api.Services;
 using DataAccess;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Xunit;
 
 namespace Tests;
 
-public class AuthServiceTests(IAuthService authService, JerneDbContext dbContext)
+[Collection("IntegrationTests")]
+public class AuthServiceTests
 {
+    private readonly IAuthService _authService;
+    private readonly JerneDbContext _dbContext;
+
+    public AuthServiceTests(IAuthService authService, JerneDbContext dbContext)
+    {
+        _authService = authService;
+        _dbContext = dbContext;
+    }
+
     private async Task ClearDatabase()
     {
-        dbContext.Users.RemoveRange(dbContext.Users);
-        await dbContext.SaveChangesAsync();
+        _dbContext.ChangeTracker.Clear();
+        await _dbContext.Database.ExecuteSqlRawAsync(
+            "TRUNCATE TABLE \"Users\" RESTART IDENTITY CASCADE;");
     }
-    
+
     [Fact]
     public async Task RegisterUser_ShouldCreateUser()
     {
@@ -28,17 +40,17 @@ public class AuthServiceTests(IAuthService authService, JerneDbContext dbContext
             PhoneNumber = "12345678"
         };
 
-        var result = await authService.RegisterUser(dto);
+        var result = await _authService.RegisterUser(dto);
 
         Assert.NotNull(result);
         Assert.Equal(dto.Email, result.Email);
 
-        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
         Assert.NotNull(user);
         Assert.Equal("Player", user.Role);
         Assert.False(user.IsActive);
     }
-    
+
     [Fact]
     public async Task RegisterUser_ShouldThrow_WhenEmailAlreadyExists()
     {
@@ -52,10 +64,10 @@ public class AuthServiceTests(IAuthService authService, JerneDbContext dbContext
             PhoneNumber = "11111111"
         };
 
-        await authService.RegisterUser(dto);
+        await _authService.RegisterUser(dto);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            authService.RegisterUser(dto));
+            _authService.RegisterUser(dto));
     }
 
     [Fact]
@@ -72,15 +84,14 @@ public class AuthServiceTests(IAuthService authService, JerneDbContext dbContext
         };
 
         await Assert.ThrowsAsync<ValidationException>(() =>
-            authService.RegisterUser(dto));
+            _authService.RegisterUser(dto));
     }
-    
+
     [Fact]
     public async Task LoginUser_ShouldReturnToken_WhenCredentialsAreValid()
     {
         await ClearDatabase();
 
-        // Arrange
         var user = new User
         {
             UserId = Guid.NewGuid().ToString(),
@@ -93,8 +104,9 @@ public class AuthServiceTests(IAuthService authService, JerneDbContext dbContext
         };
         user.PasswordHash = new PasswordHasher<User>().HashPassword(user, "StrongPass123!");
 
-        await dbContext.Users.AddAsync(user);
-        await dbContext.SaveChangesAsync();
+        await _dbContext.Users.AddAsync(user);
+        await _dbContext.SaveChangesAsync();
+        _dbContext.ChangeTracker.Clear();
 
         var dto = new LoginRequestDto
         {
@@ -102,16 +114,14 @@ public class AuthServiceTests(IAuthService authService, JerneDbContext dbContext
             Password = "StrongPass123!"
         };
 
-        // Act
-        var result = await authService.LoginUser(dto);
+        var result = await _authService.LoginUser(dto);
 
-        // Assert
         Assert.NotNull(result);
-        Assert.NotNull(result.Token);
-        Assert.NotNull(result.RefreshToken);
+        Assert.False(string.IsNullOrWhiteSpace(result.Token));
+        Assert.False(string.IsNullOrWhiteSpace(result.RefreshToken));
         Assert.Equal(user.Email, result.User.Email);
     }
-    
+
     [Fact]
     public async Task LoginUser_ShouldThrow_WhenPasswordIsWrong()
     {
@@ -129,8 +139,9 @@ public class AuthServiceTests(IAuthService authService, JerneDbContext dbContext
         };
         user.PasswordHash = new PasswordHasher<User>().HashPassword(user, "CorrectPass123!");
 
-        await dbContext.Users.AddAsync(user);
-        await dbContext.SaveChangesAsync();
+        await _dbContext.Users.AddAsync(user);
+        await _dbContext.SaveChangesAsync();
+        _dbContext.ChangeTracker.Clear();
 
         var dto = new LoginRequestDto
         {
@@ -139,7 +150,7 @@ public class AuthServiceTests(IAuthService authService, JerneDbContext dbContext
         };
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            authService.LoginUser(dto));
+            _authService.LoginUser(dto));
     }
 
     [Fact]
@@ -159,8 +170,8 @@ public class AuthServiceTests(IAuthService authService, JerneDbContext dbContext
         };
         user.PasswordHash = new PasswordHasher<User>().HashPassword(user, "StrongPass123!");
 
-        await dbContext.Users.AddAsync(user);
-        await dbContext.SaveChangesAsync();
+        await _dbContext.Users.AddAsync(user);
+        await _dbContext.SaveChangesAsync();
 
         var dto = new LoginRequestDto
         {
@@ -169,14 +180,14 @@ public class AuthServiceTests(IAuthService authService, JerneDbContext dbContext
         };
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            authService.LoginUser(dto));
+            _authService.LoginUser(dto));
     }
-    
+
     [Fact]
     public async Task RefreshTokens_ShouldReturnNewAccessAndRefreshToken_WhenValid()
     {
         await ClearDatabase();
-        
+
         var user = new User
         {
             UserId = Guid.NewGuid().ToString(),
@@ -191,19 +202,20 @@ public class AuthServiceTests(IAuthService authService, JerneDbContext dbContext
         };
         user.PasswordHash = new PasswordHasher<User>().HashPassword(user, "StrongPass123!");
 
-        await dbContext.Users.AddAsync(user);
-        await dbContext.SaveChangesAsync();
+        await _dbContext.Users.AddAsync(user);
+        await _dbContext.SaveChangesAsync();
+        _dbContext.ChangeTracker.Clear();
 
         var dto = new RefreshTokenRequestDto
         {
             RefreshToken = "validtoken123"
         };
-        
-        var result = await authService.RefreshTokens(dto);
-        
+
+        var result = await _authService.RefreshTokens(dto);
+
         Assert.NotNull(result);
         Assert.NotEqual("validtoken123", result.RefreshToken);
-        Assert.NotNull(result.Token);
+        Assert.False(string.IsNullOrWhiteSpace(result.Token));
     }
 
     [Fact]
@@ -225,8 +237,8 @@ public class AuthServiceTests(IAuthService authService, JerneDbContext dbContext
         };
         user.PasswordHash = new PasswordHasher<User>().HashPassword(user, "StrongPass123!");
 
-        await dbContext.Users.AddAsync(user);
-        await dbContext.SaveChangesAsync();
+        await _dbContext.Users.AddAsync(user);
+        await _dbContext.SaveChangesAsync();
 
         var dto = new RefreshTokenRequestDto
         {
@@ -234,7 +246,7 @@ public class AuthServiceTests(IAuthService authService, JerneDbContext dbContext
         };
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            authService.RefreshTokens(dto));
+            _authService.RefreshTokens(dto));
     }
 
     [Fact]
@@ -256,8 +268,8 @@ public class AuthServiceTests(IAuthService authService, JerneDbContext dbContext
         };
         user.PasswordHash = new PasswordHasher<User>().HashPassword(user, "StrongPass123!");
 
-        await dbContext.Users.AddAsync(user);
-        await dbContext.SaveChangesAsync();
+        await _dbContext.Users.AddAsync(user);
+        await _dbContext.SaveChangesAsync();
 
         var dto = new RefreshTokenRequestDto
         {
@@ -265,6 +277,6 @@ public class AuthServiceTests(IAuthService authService, JerneDbContext dbContext
         };
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            authService.RefreshTokens(dto));
+            _authService.RefreshTokens(dto));
     }
 }
