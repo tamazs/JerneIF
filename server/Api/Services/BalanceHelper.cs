@@ -5,7 +5,7 @@ namespace Api.Services;
 
 public class BalanceHelper(JerneDbContext dbContext)
 {
-    public async Task<decimal> GetBalance(string userId)
+    public virtual async Task<decimal> GetBalance(string userId)
     {
         var totalDeposits = await dbContext.Transactions
             .Where(t => t.UserId == userId && t.Status == TransactionStatus.Approved.ToString())
@@ -18,7 +18,7 @@ public class BalanceHelper(JerneDbContext dbContext)
         return totalDeposits - totalSpent;
     }
     
-    public int CalculatePrice(int count)
+    public virtual int CalculatePrice(int count)
     {
         return count switch
         {

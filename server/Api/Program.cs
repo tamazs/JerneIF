@@ -12,7 +12,7 @@ namespace Api;
 
 public class Program
 {
-    public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+    public static void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<AppOptions>(provider =>
         {
@@ -21,33 +21,37 @@ public class Program
             configuration.GetSection(nameof(AppOptions)).Bind(appOptions);
             return appOptions;
         });
-        //Add DB Context here
+        
         services.AddDbContext<JerneDbContext>((services, options) =>
         {
             options.UseNpgsql(services.GetRequiredService<AppOptions>().DbConnectionString);
         });
-        var jwtSettings = configuration.GetSection("AppOptions");
+        
+        services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+            .Configure<IServiceProvider>((options, sp) =>
+            {
+                var appOptions = sp.GetRequiredService<AppOptions>();
+                var key = Encoding.UTF8.GetBytes(appOptions.Token);
 
-        var key = Encoding.UTF8.GetBytes(jwtSettings["Token"]!);
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = appOptions.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = appOptions.Audience,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateLifetime = true
+                };
+            });
 
         services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = jwtSettings["Issuer"],
-                    ValidateAudience = true,
-                    ValidAudience = jwtSettings["Audience"],
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateLifetime = true
-                };
-            });
+            .AddJwtBearer();
+        
         services.AddControllers();
         services.AddOpenApi();
         services.AddOpenApiDocument();
@@ -71,7 +75,7 @@ public class Program
     public static void Main()
     {
         var builder = WebApplication.CreateBuilder();
-        ConfigureServices(builder.Services, builder.Configuration);
+        ConfigureServices(builder.Services);
         var app = builder.Build();
 
 
