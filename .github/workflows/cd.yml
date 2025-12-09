@@ -18,14 +18,16 @@ jobs:
       - name: Set up Flyctl
         uses: superfly/flyctl-actions/setup-flyctl@master
 
-      # Deploy backend
+      # Deploy backend (server)
       - name: Deploy server
-        run: flyctl deploy --config ./server/fly.toml --remote-only
+        working-directory: ./server
+        run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
-      # Deploy frontend
+      # Deploy frontend (client)
       - name: Deploy client
-        run: flyctl deploy --config ./client/fly.toml --remote-only
+        working-directory: ./client
+        run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
