@@ -1,6 +1,6 @@
 import {createBrowserRouter} from "react-router";
+
 import Layout from "../layout/Layout.tsx";
-import ProtectedRoute from "./ProtectedRoute.tsx";
 import PlayerDashboard from "../pages/player/PlayerDashboard.tsx";
 import AdminDashboard from "../pages/admin/AdminDashboard.tsx";
 import LoginPage from "../pages/LoginPage.tsx";
@@ -14,6 +14,8 @@ import UserTransactionsPage from "../pages/player/UserTransactionsPage.tsx";
 import PlayerBoardList from "../pages/player/PlayerBoardList.tsx";
 import AdminGame from "../pages/admin/AdminGame.tsx";
 import GamesList from "../pages/admin/GamesList.tsx";
+
+import ProtectedRoute from "./ProtectedRoute.tsx";
 
 export const router = createBrowserRouter([
     {

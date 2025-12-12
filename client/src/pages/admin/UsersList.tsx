@@ -1,8 +1,10 @@
 import {useEffect, useState} from "react";
-import useJerneCrud from "../../hooks/useJerneCrud.ts";
 import {useAtom} from "jotai";
-import {usersAtom} from "../../atoms/jerneAtom.ts";
 import {useNavigate} from "react-router";
+
+import useJerneCrud from "../../hooks/useJerneCrud.ts";
+import {usersAtom} from "../../atoms/jerneAtom.ts";
+
 
 export default function UsersList() {
     const [search, setSearch] = useState("");

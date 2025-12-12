@@ -1,6 +1,8 @@
-import type {ProblemDetails} from "./problemdetails.ts";
-import {ApiException} from "../generated-ts-client.ts";
 import toast from "react-hot-toast";
+
+import {ApiException} from "../generated-ts-client.ts";
+
+import type {ProblemDetails} from "./problemdetails.ts";
 
 export default function customcatch(e : any) {
     if (e instanceof ApiException) {

@@ -1,7 +1,7 @@
 import { useState } from "react";
+
 import type {LoginRequestDto} from "../generated-ts-client.ts";
 import useJerneCrud from "../hooks/useJerneCrud.ts";
-
 import logo from "../../public/logo.png";
 
 export default function LoginPage() {

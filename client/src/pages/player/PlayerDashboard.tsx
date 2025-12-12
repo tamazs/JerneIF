@@ -1,6 +1,14 @@
 import Card from "../../components/dashboard/Card.tsx";
+import useJerneCrud from "../../hooks/useJerneCrud.ts";
+import {useEffect} from "react";
 
 export default function PlayerDashboard() {
+    const jerneCrud = useJerneCrud();
+
+    useEffect(() => {
+        jerneCrud.getBalance()
+    }, []);
+
     return (
         <div className="p-6">
             <h1 className="text-3xl font-bold mb-6">Player Dashboard</h1>

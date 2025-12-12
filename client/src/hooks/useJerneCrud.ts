@@ -1,13 +1,15 @@
-import {finalUrl} from "../baseUrl.ts";
 import {useAtom} from "jotai";
 import toast from "react-hot-toast";
+import {useNavigate} from "react-router";
+
+import {finalUrl} from "../baseUrl.ts";
 import customcatch from "../errors/customcatch.ts";
 import {
     AuthClient,
     UserClient,
     type LoginRequestDto,
     type RegisterRequestDto,
-    type UpdateUserRequestDto, type CreateTransactionRequestDto, TransactionClient, type UserDto, BoardClient,
+    type UpdateUserRequestDto, type CreateTransactionRequestDto, TransactionClient, BoardClient,
     type AddBoardRequestDto, GameClient, GameWinningNumberClient, type AddGameWinningNumbersDto,
 } from "../generated-ts-client.ts";
 import {
@@ -18,7 +20,8 @@ import {
     transactionsAtom,
     balanceAtom, boardsAtom, gamesAtom
 } from "../atoms/jerneAtom.ts";
-import {useNavigate} from "react-router";
+
+
 import {customFetch} from "./customFetch.ts";
 
 const authClient = new AuthClient(finalUrl);
@@ -32,12 +35,12 @@ export default function useJerneCrud() {
     const navigate = useNavigate();
 
     const [users, setUsers] = useAtom(usersAtom);
-    const [loggedInUser, setLoggedInUser] = useAtom(loggedInUserAtom);
-    const [accessToken, setAccessToken] = useAtom(accessTokenAtom);
-    const [refreshToken, setRefreshToken] = useAtom(refreshTokenAtom);
-    const [balance, setBalance] = useAtom(balanceAtom);
+    const [, setLoggedInUser] = useAtom(loggedInUserAtom);
+    const [, setAccessToken] = useAtom(accessTokenAtom);
+    const [, setRefreshToken] = useAtom(refreshTokenAtom);
+    const [, setBalance] = useAtom(balanceAtom);
     const [boards, setBoards] = useAtom(boardsAtom);
-    const [games, setGames] = useAtom(gamesAtom);
+    const [, setGames] = useAtom(gamesAtom);
 
     const [transactions, setTransactions] = useAtom(transactionsAtom);
 

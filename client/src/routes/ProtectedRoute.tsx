@@ -1,7 +1,8 @@
 import { Navigate } from "react-router";
 import { useAtom } from "jotai";
-import { loggedInUserAtom } from "../atoms/jerneAtom";
 import type {JSX} from "react";
+
+import { loggedInUserAtom } from "../atoms/jerneAtom.ts";
 
 export default function ProtectedRoute({
                                            children,

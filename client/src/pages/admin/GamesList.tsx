@@ -1,8 +1,10 @@
 import {useEffect, useState} from "react";
-import useJerneCrud from "../../hooks/useJerneCrud.ts";
 import {useAtom} from "jotai";
-import {gamesAtom} from "../../atoms/jerneAtom.ts";
 import {useNavigate} from "react-router";
+
+import useJerneCrud from "../../hooks/useJerneCrud.ts";
+import {gamesAtom} from "../../atoms/jerneAtom.ts";
+
 
 export default function GamesList() {
     const [page, setPage] = useState(1);
@@ -30,9 +32,6 @@ export default function GamesList() {
 
     return (
         <div className="overflow-x-auto flex flex-col">
-            <div className="flex justify-end items-center">
-                <button className="btn btn-primary" onClick={() => navigate("/addboard")}>Add Board</button>
-            </div>
             <table className="table mb-4">
                 {/* head */}
                 <thead>
