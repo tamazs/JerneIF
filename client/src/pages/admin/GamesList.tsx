@@ -32,9 +32,6 @@ export default function GamesList() {
 
     return (
         <div className="overflow-x-auto flex flex-col">
-            <div className="flex justify-end items-center">
-                <button className="btn btn-primary" onClick={() => navigate("/addboard")}>Add Board</button>
-            </div>
             <table className="table mb-4">
                 {/* head */}
                 <thead>
