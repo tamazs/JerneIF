@@ -1,10 +1,11 @@
-import type { ProblemDetails } from "../errors/problemdetails.ts";
 import toast from "react-hot-toast";
+
+import type { ProblemDetails } from "../errors/problemdetails.ts";
 import { finalUrl } from "../baseUrl.ts";
 
 export const customFetch = {
     fetch: async (url: RequestInfo, init?: RequestInit): Promise<Response> => {
-        let token = localStorage.getItem("accessToken");
+        const token = localStorage.getItem("accessToken");
         const refreshToken = localStorage.getItem("refreshToken");
 
         const headers = new Headers(init?.headers);

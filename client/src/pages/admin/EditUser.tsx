@@ -1,9 +1,10 @@
 import {useEffect, useState} from "react";
-import useJerneCrud from "../../hooks/useJerneCrud.ts";
-import type {UpdateUserRequestDto, UserDto} from "../../generated-ts-client.ts";
 import {useParams} from "react-router";
 import {useAtom} from "jotai";
-import {loggedInUserAtom, usersAtom} from "../../atoms/jerneAtom.ts";
+
+import useJerneCrud from "../../hooks/useJerneCrud.ts";
+import type {UpdateUserRequestDto, UserDto} from "../../generated-ts-client.ts";
+import {loggedInUserAtom} from "../../atoms/jerneAtom.ts";
 
 export default function EditUser() {
     const jerneCrud = useJerneCrud();
