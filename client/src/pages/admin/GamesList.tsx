@@ -1,6 +1,5 @@
 import {useEffect, useState} from "react";
 import {useAtom} from "jotai";
-import {useNavigate} from "react-router";
 
 import useJerneCrud from "../../hooks/useJerneCrud.ts";
 import {gamesAtom} from "../../atoms/jerneAtom.ts";
@@ -8,7 +7,6 @@ import {gamesAtom} from "../../atoms/jerneAtom.ts";
 
 export default function GamesList() {
     const [page, setPage] = useState(1);
-    const navigate = useNavigate();
 
     const [games] = useAtom(gamesAtom);
 
