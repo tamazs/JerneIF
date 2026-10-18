@@ -62,6 +62,7 @@ public class Program
         services.AddOpenApi();
         services.AddOpenApiDocument();
         services.AddCors();
+        services.AddMemoryCache();
 
         services.AddScoped<ISieveProcessor, SieveProcessor>();
         services.AddScoped<IAuthService, AuthService>();
