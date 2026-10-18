@@ -279,4 +279,35 @@ public class AuthServiceTests
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
             _authService.RefreshTokens(dto));
     }
+
+    [Fact]
+    public async Task RefreshTokens_ShouldThrow_WhenUserIsDeactivated()
+    {
+        await ClearDatabase();
+
+        var user = new User
+        {
+            UserId = Guid.NewGuid().ToString(),
+            FullName = "Deactivated",
+            Email = "deactivated@test.com",
+            PhoneNumber = "88888888",
+            Role = "Player",
+            IsActive = false,
+            CreatedAt = DateTime.UtcNow,
+            RefreshToken = "stilltoken123",
+            RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(1)
+        };
+        user.PasswordHash = new PasswordHasher<User>().HashPassword(user, "StrongPass123!");
+
+        await _dbContext.Users.AddAsync(user);
+        await _dbContext.SaveChangesAsync();
+
+        var dto = new RefreshTokenRequestDto
+        {
+            RefreshToken = "stilltoken123"
+        };
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+            _authService.RefreshTokens(dto));
+    }
 }

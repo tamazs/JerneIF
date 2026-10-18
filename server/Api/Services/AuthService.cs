@@ -68,7 +68,7 @@ public class AuthService(JerneDbContext dbContext, IConfiguration configuration)
         var user = await dbContext.Users
             .FirstOrDefaultAsync(x => x.RefreshToken == dto.RefreshToken);
 
-        if (user == null || user.RefreshTokenExpiresAt < DateTime.UtcNow)
+        if (user == null || !user.IsActive || user.RefreshTokenExpiresAt < DateTime.UtcNow)
             throw new UnauthorizedAccessException("Invalid refresh token");
         
         var newAccessToken = CreateToken(user);
