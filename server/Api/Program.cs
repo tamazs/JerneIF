@@ -83,7 +83,6 @@ public class Program
         Validator.ValidateObject(appOptions, new ValidationContext(appOptions), true);
         app.UseExceptionHandler();
         app.UseOpenApi();
-        app.UseOpenApi();
 
         if (app.Environment.IsDevelopment())
         {
