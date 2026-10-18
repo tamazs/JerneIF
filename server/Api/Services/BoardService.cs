@@ -8,7 +8,7 @@ using Sieve.Services;
 
 namespace Api.Services;
 
-public class BoardService(JerneDbContext dbContext, ISieveProcessor sieveProcessor, BalanceHelper balanceHelper, GameQueryHelper gameQueryHelper) : IBoardService
+public class BoardService(JerneDbContext dbContext, ISieveProcessor sieveProcessor, BalanceHelper balanceHelper, GameQueryHelper gameQueryHelper, TimeProvider? timeProvider = null) : IBoardService
 {
     public async Task<List<BoardDto>> GetAllBoards(SieveModel sieveModel)
     {
@@ -32,6 +32,13 @@ public class BoardService(JerneDbContext dbContext, ISieveProcessor sieveProcess
     {
         Validator.ValidateObject(dto, new ValidationContext(dto), true);
 
+        // Serialize board purchases per user. The balance check and the insert must see each other:
+        // without this lock, two parallel requests could both pass "already has a board" and
+        // "enough balance" and both be saved. The lock is released when the transaction ends.
+        await using var dbTransaction = await dbContext.Database.BeginTransactionAsync();
+        await dbContext.Database.ExecuteSqlInterpolatedAsync(
+            $"SELECT 1 FROM \"Users\" WHERE \"UserId\" = {userId} FOR UPDATE");
+
         var activeGame = await gameQueryHelper.GetActiveGame();
 
         var userAlreadyHasBoard =
@@ -39,7 +46,7 @@ public class BoardService(JerneDbContext dbContext, ISieveProcessor sieveProcess
 
         if (userAlreadyHasBoard) throw new ValidationException("You have already submitted a board for this game.");
         
-        var danishTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Europe/Copenhagen");
+        var danishTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId((timeProvider ?? TimeProvider.System).GetUtcNow().UtcDateTime, "Europe/Copenhagen");
         
         if (danishTime.DayOfWeek == DayOfWeek.Saturday && danishTime.Hour >= 17)
             throw new ValidationException("Boards cannot be submitted after Saturday 17:00.");
@@ -78,6 +85,7 @@ public class BoardService(JerneDbContext dbContext, ISieveProcessor sieveProcess
         
         await dbContext.Boards.AddAsync(board);
         await dbContext.SaveChangesAsync();
+        await dbTransaction.CommitAsync();
         return new BoardDto(board);
     }
 }
