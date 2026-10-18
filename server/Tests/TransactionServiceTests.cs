@@ -276,4 +276,89 @@ public class TransactionServiceTests
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
             _transactionService.DenyTransaction("admin-id", "fake-transaction-id"));
     }
+
+    private async Task<(User admin, Transaction transaction)> AddAdminAndPendingTransaction()
+    {
+        var admin = new User
+        {
+            UserId = Guid.NewGuid().ToString(),
+            FullName = "Admin",
+            Email = "admin@test.com",
+            PhoneNumber = "11111111",
+            Role = "Admin",
+            PasswordHash = new PasswordHasher<User>().HashPassword(null!, "Password123!"),
+            IsActive = true
+        };
+        var player = new User
+        {
+            UserId = Guid.NewGuid().ToString(),
+            FullName = "Gina",
+            Email = "gina@test.com",
+            PhoneNumber = "33333333",
+            Role = "Player",
+            PasswordHash = new PasswordHasher<User>().HashPassword(null!, "Password123!"),
+            IsActive = true
+        };
+        await _dbContext.Users.AddRangeAsync(admin, player);
+
+        var transaction = new Transaction
+        {
+            TransactionId = Guid.NewGuid().ToString(),
+            UserId = player.UserId,
+            Amount = 100,
+            MobilePayReference = "ONCE",
+            Status = "Pending",
+            CreatedAt = DateTime.UtcNow
+        };
+        await _dbContext.Transactions.AddAsync(transaction);
+        await _dbContext.SaveChangesAsync();
+        return (admin, transaction);
+    }
+
+    [Fact]
+    public async Task ApproveTransaction_ShouldThrow_WhenAlreadyApproved()
+    {
+        await ClearDatabase();
+        var (admin, transaction) = await AddAdminAndPendingTransaction();
+
+        var first = await _transactionService.ApproveTransaction(admin.UserId, transaction.TransactionId);
+
+        await Assert.ThrowsAsync<ValidationException>(() =>
+            _transactionService.ApproveTransaction(admin.UserId, transaction.TransactionId));
+
+        var fromDb = await _dbContext.Transactions.AsNoTracking().FirstAsync(t => t.TransactionId == transaction.TransactionId);
+        Assert.Equal("Approved", fromDb.Status);
+        Assert.Equal(first.ApprovedAt, fromDb.ApprovedAt);
+    }
+
+    [Fact]
+    public async Task DenyTransaction_ShouldThrow_WhenAlreadyApproved()
+    {
+        await ClearDatabase();
+        var (admin, transaction) = await AddAdminAndPendingTransaction();
+
+        await _transactionService.ApproveTransaction(admin.UserId, transaction.TransactionId);
+
+        await Assert.ThrowsAsync<ValidationException>(() =>
+            _transactionService.DenyTransaction(admin.UserId, transaction.TransactionId));
+
+        var fromDb = await _dbContext.Transactions.AsNoTracking().FirstAsync(t => t.TransactionId == transaction.TransactionId);
+        Assert.Equal("Approved", fromDb.Status);
+        Assert.Null(fromDb.DeletedAt);
+    }
+
+    [Fact]
+    public async Task ApproveTransaction_ShouldThrow_WhenAlreadyRejected()
+    {
+        await ClearDatabase();
+        var (admin, transaction) = await AddAdminAndPendingTransaction();
+
+        await _transactionService.DenyTransaction(admin.UserId, transaction.TransactionId);
+
+        await Assert.ThrowsAsync<ValidationException>(() =>
+            _transactionService.ApproveTransaction(admin.UserId, transaction.TransactionId));
+
+        var fromDb = await _dbContext.Transactions.AsNoTracking().FirstAsync(t => t.TransactionId == transaction.TransactionId);
+        Assert.Equal("Rejected", fromDb.Status);
+    }
 }

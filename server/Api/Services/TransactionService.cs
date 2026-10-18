@@ -54,25 +54,43 @@ public class TransactionService(JerneDbContext dbContext, ISieveProcessor sieveP
         return new TransactionDto(loaded);
     }
 
+    // Loads the transaction under a row lock so two admins cannot process it at the same time,
+    // and only lets a Pending transaction be processed. The caller must own the surrounding database transaction.
+    private async Task<Transaction> LockPendingTransaction(string transactionId)
+    {
+        await dbContext.Database.ExecuteSqlInterpolatedAsync(
+            $"SELECT 1 FROM \"Transactions\" WHERE \"TransactionId\" = {transactionId} FOR UPDATE");
+
+        var transaction = await dbContext.Transactions.Include(t => t.User).FirstOrDefaultAsync(t => t.TransactionId == transactionId);
+        if (transaction == null) throw new KeyNotFoundException("Transaction not found.");
+
+        if (transaction.Status != TransactionStatus.Pending.ToString())
+            throw new ValidationException($"Transaction has already been processed ({transaction.Status}).");
+
+        return transaction;
+    }
+
     public async Task<TransactionDto> ApproveTransaction(string userId, string transactionId)
     {
-        var transaction = await dbContext.Transactions.Include(t => t.User).FirstOrDefaultAsync(t => t.TransactionId == transactionId);
-        if (transaction == null)  throw new KeyNotFoundException("Transaction not found.");
+        await using var dbTransaction = await dbContext.Database.BeginTransactionAsync();
+        var transaction = await LockPendingTransaction(transactionId);
         transaction.Status = TransactionStatus.Approved.ToString();
         transaction.ApprovedByUserId = userId;
         transaction.ApprovedAt = DateTime.UtcNow;
         await dbContext.SaveChangesAsync();
+        await dbTransaction.CommitAsync();
         return new TransactionDto(transaction);
     }
 
     public async Task<TransactionDto> DenyTransaction(string userId, string transactionId)
     {
-        var transaction = await dbContext.Transactions.Include(t => t.User).FirstOrDefaultAsync(t => t.TransactionId == transactionId);
-        if (transaction == null)  throw new KeyNotFoundException("Transaction not found.");
+        await using var dbTransaction = await dbContext.Database.BeginTransactionAsync();
+        var transaction = await LockPendingTransaction(transactionId);
         transaction.Status = TransactionStatus.Rejected.ToString();
         transaction.ApprovedByUserId = userId;
         transaction.DeletedAt = DateTime.UtcNow;
         await dbContext.SaveChangesAsync();
+        await dbTransaction.CommitAsync();
         return new TransactionDto(transaction);
     }
 }
