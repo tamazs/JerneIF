@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Api;
 using Api.DTOs.Request;
 using Api.Services;
 using DataAccess;
@@ -95,7 +96,7 @@ public class UserServiceTests
         await _dbContext.Users.AddAsync(user);
         await _dbContext.SaveChangesAsync();
 
-        var result = await _userService.GetUserById(user.UserId);
+        var result = await _userService.GetUserById(user.UserId, "admin-id", true);
 
         Assert.NotNull(result);
         Assert.Equal("Charlie", result.FullName);
@@ -107,7 +108,7 @@ public class UserServiceTests
         await ClearDatabase();
 
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-            _userService.GetUserById("nonexistent-id"));
+            _userService.GetUserById("nonexistent-id", "admin-id", true));
     }
 
     [Fact]
@@ -139,7 +140,7 @@ public class UserServiceTests
             IsActive = true
         };
 
-        var result = await _userService.UpdateUser(dto);
+        var result = await _userService.UpdateUser(dto, "admin-id", true);
 
         Assert.Equal("David Updated", result.FullName);
         Assert.Equal("Admin", result.Role);
@@ -179,7 +180,7 @@ public class UserServiceTests
             NewPassword = "NewPassword456!"
         };
 
-        var result = await _userService.UpdateUser(dto);
+        var result = await _userService.UpdateUser(dto, trackedUser.UserId, false);
 
         Assert.NotNull(result);
         Assert.Equal(trackedUser.Email, result.Email);
@@ -224,7 +225,7 @@ public class UserServiceTests
         };
 
         await Assert.ThrowsAsync<ValidationException>(() =>
-            _userService.UpdateUser(dto));
+            _userService.UpdateUser(dto, user.UserId, false));
     }
 
     [Fact]
@@ -242,7 +243,7 @@ public class UserServiceTests
         };
 
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-            _userService.UpdateUser(dto));
+            _userService.UpdateUser(dto, "admin-id", true));
     }
 
     [Fact]
@@ -280,5 +281,165 @@ public class UserServiceTests
 
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
             _userService.DeleteUser("fake-id"));
+    }
+
+    private async Task<User> AddUser(string name, string role = "Player")
+    {
+        var user = new User
+        {
+            UserId = Guid.NewGuid().ToString(),
+            FullName = name,
+            Email = $"{name.ToLower()}@test.com",
+            PhoneNumber = "12345678",
+            Role = role,
+            IsActive = true,
+            PasswordHash = new PasswordHasher<User>().HashPassword(null!, "Password123!")
+        };
+        await _dbContext.Users.AddAsync(user);
+        await _dbContext.SaveChangesAsync();
+        return user;
+    }
+
+    private static UpdateUserRequestDto UpdateDtoFor(User user, string? role = null) => new()
+    {
+        UserId = user.UserId,
+        FullName = user.FullName,
+        PhoneNumber = user.PhoneNumber,
+        Email = user.Email,
+        Role = role ?? user.Role,
+        IsActive = true
+    };
+
+    [Fact]
+    public async Task UpdateUser_Player_CannotPromoteSelfToAdmin()
+    {
+        await ClearDatabase();
+        var player = await AddUser("Pia");
+
+        var result = await _userService.UpdateUser(UpdateDtoFor(player, "Admin"), player.UserId, false);
+
+        Assert.Equal("Player", result.Role);
+        var fromDb = await _dbContext.Users.AsNoTracking().FirstAsync(u => u.UserId == player.UserId);
+        Assert.Equal("Player", fromDb.Role);
+    }
+
+    [Fact]
+    public async Task UpdateUser_Player_CanUpdateOwnProfileFields()
+    {
+        await ClearDatabase();
+        var player = await AddUser("Paul");
+        var dto = UpdateDtoFor(player);
+        dto.FullName = "Paul Renamed";
+
+        var result = await _userService.UpdateUser(dto, player.UserId, false);
+
+        Assert.Equal("Paul Renamed", result.FullName);
+    }
+
+    [Fact]
+    public async Task UpdateUser_Player_CannotReactivateSelf()
+    {
+        await ClearDatabase();
+        var player = await AddUser("Quinn");
+        player.IsActive = false;
+        await _dbContext.SaveChangesAsync();
+
+        await _userService.UpdateUser(UpdateDtoFor(player), player.UserId, false);
+
+        var fromDb = await _dbContext.Users.AsNoTracking().FirstAsync(u => u.UserId == player.UserId);
+        Assert.False(fromDb.IsActive);
+    }
+
+    [Fact]
+    public async Task UpdateUser_Player_CannotUpdateAnotherUser()
+    {
+        await ClearDatabase();
+        var attacker = await AddUser("Mallory");
+        var victim = await AddUser("Victor");
+        var dto = UpdateDtoFor(victim);
+        dto.FullName = "Hacked";
+
+        await Assert.ThrowsAsync<ForbiddenException>(() =>
+            _userService.UpdateUser(dto, attacker.UserId, false));
+
+        var fromDb = await _dbContext.Users.AsNoTracking().FirstAsync(u => u.UserId == victim.UserId);
+        Assert.Equal("Victor", fromDb.FullName);
+    }
+
+    [Fact]
+    public async Task UpdateUser_Admin_CanUpdateAnotherUserAndChangeRole()
+    {
+        await ClearDatabase();
+        var admin = await AddUser("Adam", "Admin");
+        var player = await AddUser("Penny");
+
+        var result = await _userService.UpdateUser(UpdateDtoFor(player, "Admin"), admin.UserId, true);
+
+        Assert.Equal("Admin", result.Role);
+    }
+
+    [Theory]
+    [InlineData("SuperAdmin")]
+    [InlineData("admin")]
+    [InlineData("0")]
+    public async Task UpdateUser_Admin_RejectsInvalidRole(string badRole)
+    {
+        await ClearDatabase();
+        var admin = await AddUser("Alice", "Admin");
+        var player = await AddUser("Pete");
+
+        await Assert.ThrowsAsync<ValidationException>(() =>
+            _userService.UpdateUser(UpdateDtoFor(player, badRole), admin.UserId, true));
+
+        var fromDb = await _dbContext.Users.AsNoTracking().FirstAsync(u => u.UserId == player.UserId);
+        Assert.Equal("Player", fromDb.Role);
+    }
+
+    [Fact]
+    public async Task UpdateUser_Admin_WithoutRole_KeepsExistingRole()
+    {
+        await ClearDatabase();
+        var admin = await AddUser("Anna", "Admin");
+        var player = await AddUser("Pam");
+        var dto = UpdateDtoFor(player);
+        dto.Role = null;
+
+        var result = await _userService.UpdateUser(dto, admin.UserId, true);
+
+        Assert.Equal("Player", result.Role);
+    }
+
+    [Fact]
+    public async Task GetUserById_Player_CanReadSelf()
+    {
+        await ClearDatabase();
+        var player = await AddUser("Pablo");
+
+        var result = await _userService.GetUserById(player.UserId, player.UserId, false);
+
+        Assert.Equal("Pablo", result.FullName);
+    }
+
+    [Fact]
+    public async Task GetUserById_Player_CannotReadAnotherUser()
+    {
+        await ClearDatabase();
+        var attacker = await AddUser("Eve");
+        var victim = await AddUser("Bob");
+
+        await Assert.ThrowsAsync<ForbiddenException>(() =>
+            _userService.GetUserById(victim.UserId, attacker.UserId, false));
+    }
+
+    [Fact]
+    public async Task GetUserById_Admin_CanReadAnyUser()
+    {
+        await ClearDatabase();
+        var admin = await AddUser("Alex", "Admin");
+        var player = await AddUser("Pat");
+
+        var result = await _userService.GetUserById(player.UserId, admin.UserId, true);
+
+        Assert.Equal("Pat", result.FullName);
     }
 }

@@ -11,7 +11,9 @@ public class GlobalExceptionHandler : IExceptionHandler
         var problemDetails = new ProblemDetails
         {
             Title = exception.Message,
-            Status = StatusCodes.Status500InternalServerError
+            Status = exception is ForbiddenException
+                ? StatusCodes.Status403Forbidden
+                : StatusCodes.Status500InternalServerError
         };
 
         httpContext.Response.StatusCode = problemDetails.Status.Value;

@@ -28,14 +28,14 @@ public class UserController : BaseController
     [HttpGet(nameof(GetUserById))]
     public async Task<UserDto> GetUserById(string userId)
     {
-        return await _userService.GetUserById(userId);
+        return await _userService.GetUserById(userId, CurrentUserId, IsAdmin);
     }
 
     [Authorize]
     [HttpPut(nameof(UpdateUser))]
     public async Task<UserDto> UpdateUser([FromBody] UpdateUserRequestDto dto)
     {
-        return await _userService.UpdateUser(dto);
+        return await _userService.UpdateUser(dto, CurrentUserId, IsAdmin);
     }
     
     [Authorize(Roles = "Admin")]
