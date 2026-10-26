@@ -172,6 +172,75 @@ public class GameServiceTests
         Assert.Single(boards);
         Assert.Equal(user.UserId, boards.First().UserId);
         Assert.Equal(1, boards.First().RepeatCount);
+        Assert.True(boards.First().IsRepeating);
+
+        // The original board keeps the repeat count it was bought with.
+        var original = await _dbContext.Boards.AsNoTracking().FirstAsync(b => b.BoardId == board.BoardId);
+        Assert.Equal(2, original.RepeatCount);
+        Assert.False(original.IsRepeating);
+    }
+
+    [Fact]
+    public async Task CreateGame_ShouldRepeatExactlyTheChosenNumberOfTimes()
+    {
+        await ClearDatabase();
+
+        var user = new User
+        {
+            UserId = Guid.NewGuid().ToString(),
+            FullName = "Chain",
+            Email = "chain@test.com",
+            PhoneNumber = "12345678",
+            Role = "Player",
+            PasswordHash = new PasswordHasher<User>().HashPassword(null!, "Password123!"),
+            IsActive = true
+        };
+        await _dbContext.Users.AddAsync(user);
+        var oldGame = await CreateDummyGame();
+
+        var boardNumbers = new BoardNumber
+        {
+            BoardNumbersId = Guid.NewGuid().ToString(),
+            BoardNumbers = new List<int> { 1, 2, 3, 4, 5 }
+        };
+        var board = new Board
+        {
+            BoardId = Guid.NewGuid().ToString(),
+            GameId = oldGame.GameId,
+            UserId = user.UserId,
+            IsRepeating = true,
+            RepeatCount = 2,
+            PurchasedAt = DateTime.UtcNow.AddDays(-1),
+            BoardNumber = boardNumbers,
+            NumberCount = 5,
+            Price = 100
+        };
+        await _dbContext.BoardNumbers.AddAsync(boardNumbers);
+        await _dbContext.Boards.AddAsync(board);
+        await _dbContext.SaveChangesAsync();
+
+        var gameService = new GameService(_dbContext, _sieveProcessor, new FakeBalanceHelper(1000, 100));
+
+        async Task<List<Board>> BoardsIn(string gameId) =>
+            await _dbContext.Boards.AsNoTracking().Where(b => b.GameId == gameId).ToListAsync();
+
+        // Check each game right after it is created: a board hands its repeat on to the next
+        // game and then stops repeating itself, so reading it later would show IsRepeating = false.
+        var game1 = await gameService.CreateGame();
+        var inGame1 = await BoardsIn(game1.GameId);
+        Assert.Single(inGame1);
+        Assert.Equal(1, inGame1[0].RepeatCount);
+        Assert.True(inGame1[0].IsRepeating);
+
+        var game2 = await gameService.CreateGame();
+        var inGame2 = await BoardsIn(game2.GameId);
+        Assert.Single(inGame2);
+        Assert.Equal(0, inGame2[0].RepeatCount);
+        Assert.False(inGame2[0].IsRepeating);
+
+        // Repeats are used up, so nothing is copied into the third game.
+        var game3 = await gameService.CreateGame();
+        Assert.Empty(await BoardsIn(game3.GameId));
     }
 
     [Fact]
@@ -230,6 +299,6 @@ public class GameServiceTests
 
         var oldBoard = await _dbContext.Boards.Include(b => b.BoardNumber).FirstAsync(b => b.UserId == user.UserId);
         Assert.False(oldBoard.IsRepeating);
-        Assert.Equal(0, oldBoard.RepeatCount);
+        Assert.Equal(2, oldBoard.RepeatCount);
     }
 }

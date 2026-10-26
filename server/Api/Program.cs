@@ -12,6 +12,12 @@ namespace Api;
 
 public class Program
 {
+    public static readonly string[] DefaultAllowedOrigins =
+    [
+        "http://localhost:5173",
+        "https://jerneif-frontend.fly.dev"
+    ];
+
     public static void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<AppOptions>(provider =>
@@ -56,6 +62,7 @@ public class Program
         services.AddOpenApi();
         services.AddOpenApiDocument();
         services.AddCors();
+        services.AddMemoryCache();
 
         services.AddScoped<ISieveProcessor, SieveProcessor>();
         services.AddScoped<IAuthService, AuthService>();
@@ -83,7 +90,6 @@ public class Program
         Validator.ValidateObject(appOptions, new ValidationContext(appOptions), true);
         app.UseExceptionHandler();
         app.UseOpenApi();
-        app.UseOpenApi();
 
         if (app.Environment.IsDevelopment())
         {
@@ -92,7 +98,10 @@ public class Program
         }
 
 
-        app.UseCors(config => config.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().SetIsOriginAllowed(x => true));
+        var allowedOrigins = appOptions.AllowedOrigins is { Length: > 0 }
+            ? appOptions.AllowedOrigins
+            : DefaultAllowedOrigins;
+        app.UseCors(config => config.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod());
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();

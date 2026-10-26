@@ -8,12 +8,33 @@ using Api.DTOs.Request;
 using DataAccess;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Api.Services;
 
-public class AuthService(JerneDbContext dbContext, IConfiguration configuration) : IAuthService
+public class AuthService(JerneDbContext dbContext, IConfiguration configuration, IMemoryCache cache) : IAuthService
 {
+    // Login lockout: after MaxFailedLogins wrong attempts for the same email, further attempts are refused
+    // until LockoutDuration has passed since the last failure. The counter lives in memory, so it is
+    // per server instance and resets on restart. It limits online password guessing, it is not a full defence.
+    private const int MaxFailedLogins = 5;
+    private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(15);
+
+    private static string LoginFailureKey(string email) => $"login-failures:{email.Trim().ToLowerInvariant()}";
+
+    private void EnsureNotLockedOut(string key)
+    {
+        if (cache.TryGetValue(key, out int failures) && failures >= MaxFailedLogins)
+            throw new UnauthorizedAccessException("Too many failed login attempts. Try again later.");
+    }
+
+    private void RegisterLoginFailure(string key)
+    {
+        cache.TryGetValue(key, out int failures);
+        cache.Set(key, failures + 1, LockoutDuration);
+    }
+
     public async Task<UserDto> RegisterUser(RegisterRequestDto dto)
     {
         Validator.ValidateObject(dto, new ValidationContext(dto), true);
@@ -43,11 +64,24 @@ public class AuthService(JerneDbContext dbContext, IConfiguration configuration)
     {
         Validator.ValidateObject(dto, new ValidationContext(dto), true);
         
+        var failureKey = LoginFailureKey(dto.Email);
+        EnsureNotLockedOut(failureKey);
+
         var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
-        if (user == null) throw new UnauthorizedAccessException("Invalid username or password");
+        if (user == null)
+        {
+            RegisterLoginFailure(failureKey);
+            throw new UnauthorizedAccessException("Invalid username or password");
+        }
         
         var verification = new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, dto.Password);
-        if (verification ==  PasswordVerificationResult.Failed) throw new UnauthorizedAccessException("Invalid username or password");
+        if (verification ==  PasswordVerificationResult.Failed)
+        {
+            RegisterLoginFailure(failureKey);
+            throw new UnauthorizedAccessException("Invalid username or password");
+        }
+
+        cache.Remove(failureKey);
         
         if (!user.IsActive) throw new UnauthorizedAccessException("Your account is not active");
         
@@ -68,7 +102,7 @@ public class AuthService(JerneDbContext dbContext, IConfiguration configuration)
         var user = await dbContext.Users
             .FirstOrDefaultAsync(x => x.RefreshToken == dto.RefreshToken);
 
-        if (user == null || user.RefreshTokenExpiresAt < DateTime.UtcNow)
+        if (user == null || !user.IsActive || user.RefreshTokenExpiresAt < DateTime.UtcNow)
             throw new UnauthorizedAccessException("Invalid refresh token");
         
         var newAccessToken = CreateToken(user);

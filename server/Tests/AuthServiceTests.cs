@@ -279,4 +279,102 @@ public class AuthServiceTests
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
             _authService.RefreshTokens(dto));
     }
+
+    [Fact]
+    public async Task RefreshTokens_ShouldThrow_WhenUserIsDeactivated()
+    {
+        await ClearDatabase();
+
+        var user = new User
+        {
+            UserId = Guid.NewGuid().ToString(),
+            FullName = "Deactivated",
+            Email = "deactivated@test.com",
+            PhoneNumber = "88888888",
+            Role = "Player",
+            IsActive = false,
+            CreatedAt = DateTime.UtcNow,
+            RefreshToken = "stilltoken123",
+            RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(1)
+        };
+        user.PasswordHash = new PasswordHasher<User>().HashPassword(user, "StrongPass123!");
+
+        await _dbContext.Users.AddAsync(user);
+        await _dbContext.SaveChangesAsync();
+
+        var dto = new RefreshTokenRequestDto
+        {
+            RefreshToken = "stilltoken123"
+        };
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+            _authService.RefreshTokens(dto));
+    }
+
+    [Fact]
+    public async Task LoginUser_ShouldLockOut_AfterTooManyFailedAttempts()
+    {
+        await ClearDatabase();
+
+        var user = new User
+        {
+            UserId = Guid.NewGuid().ToString(),
+            FullName = "Lockout User",
+            Email = "lockout@test.com",
+            PhoneNumber = "99999999",
+            Role = "Player",
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        };
+        user.PasswordHash = new PasswordHasher<User>().HashPassword(user, "StrongPass123!");
+
+        await _dbContext.Users.AddAsync(user);
+        await _dbContext.SaveChangesAsync();
+        _dbContext.ChangeTracker.Clear();
+
+        for (var i = 0; i < 5; i++)
+        {
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+                _authService.LoginUser(new LoginRequestDto { Email = "lockout@test.com", Password = "WrongPass123!" }));
+        }
+
+        // Even the correct password is refused while locked out.
+        var ex = await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+            _authService.LoginUser(new LoginRequestDto { Email = "lockout@test.com", Password = "StrongPass123!" }));
+        Assert.Contains("Too many", ex.Message);
+    }
+
+    [Fact]
+    public async Task LoginUser_ShouldResetFailureCount_AfterSuccessfulLogin()
+    {
+        await ClearDatabase();
+
+        var user = new User
+        {
+            UserId = Guid.NewGuid().ToString(),
+            FullName = "Reset User",
+            Email = "reset@test.com",
+            PhoneNumber = "99999998",
+            Role = "Player",
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        };
+        user.PasswordHash = new PasswordHasher<User>().HashPassword(user, "StrongPass123!");
+
+        await _dbContext.Users.AddAsync(user);
+        await _dbContext.SaveChangesAsync();
+        _dbContext.ChangeTracker.Clear();
+
+        for (var round = 0; round < 2; round++)
+        {
+            for (var i = 0; i < 4; i++)
+            {
+                await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+                    _authService.LoginUser(new LoginRequestDto { Email = "reset@test.com", Password = "WrongPass123!" }));
+            }
+
+            var result = await _authService.LoginUser(new LoginRequestDto { Email = "reset@test.com", Password = "StrongPass123!" });
+            Assert.False(string.IsNullOrWhiteSpace(result.Token));
+        }
+    }
 }

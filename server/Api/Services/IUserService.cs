@@ -7,7 +7,7 @@ namespace Api.Services;
 public interface IUserService
 {
     Task<List<UserDto>> GetAllUsers(SieveModel sieveModel);
-    Task<UserDto> GetUserById(string userId);
-    Task<UserDto> UpdateUser(UpdateUserRequestDto dto);
+    Task<UserDto> GetUserById(string userId, string? callerId, bool callerIsAdmin);
+    Task<UserDto> UpdateUser(UpdateUserRequestDto dto, string? callerId, bool callerIsAdmin);
     Task<UserDto> DeleteUser(string userId);
 }

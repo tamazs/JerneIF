@@ -25,8 +25,19 @@ public class BoardServiceTests
         _sieveProcessor = sieveProcessor;
         _fakeBalanceHelper = new FakeBalanceHelper();
         _fakeGameQueryHelper = new FakeGameQueryHelper();
-        _service = new BoardService(_dbContext, _sieveProcessor, _fakeBalanceHelper, _fakeGameQueryHelper);
+        _service = new BoardService(_dbContext, _sieveProcessor, _fakeBalanceHelper, _fakeGameQueryHelper, Wednesday);
     }
+
+    // CreateBoard rejects Saturday evening and Sunday (Danish time), so tests pin the clock to a Wednesday.
+    private static readonly TimeProvider Wednesday = new FixedTimeProvider(new DateTimeOffset(2026, 1, 7, 12, 0, 0, TimeSpan.Zero));
+
+    private class FixedTimeProvider(DateTimeOffset now) : TimeProvider
+    {
+        public override DateTimeOffset GetUtcNow() => now;
+    }
+
+    private JerneDbContext NewContext() => new(
+        new DbContextOptionsBuilder<JerneDbContext>().UseNpgsql(_dbContext.Database.GetConnectionString()).Options);
 
     private async Task ClearDatabase()
     {
@@ -286,5 +297,48 @@ public class BoardServiceTests
 
         var ex = new ValidationException("Boards cannot be submitted on Sunday.");
         Assert.Equal("Boards cannot be submitted on Sunday.", ex.Message);
+    }
+
+    [Fact]
+    public async Task CreateBoard_ShouldAllowOnlyOneBoard_WhenSubmittedConcurrently()
+    {
+        await ClearDatabase();
+
+        var user = CreateTestUser("racer", "Rita", "rita@test.com");
+        var game = new Game { GameId = Guid.NewGuid().ToString(), Status = "Active", CreatedAt = DateTime.UtcNow };
+        await _dbContext.Users.AddAsync(user);
+        await _dbContext.Games.AddAsync(game);
+        await _dbContext.SaveChangesAsync();
+
+        // Each request gets its own DbContext, like separate HTTP requests do.
+        async Task<bool> Submit()
+        {
+            await using var context = NewContext();
+            var gameQuery = new FakeGameQueryHelper();
+            gameQuery.SetActiveGame(game);
+            var service = new BoardService(context, _sieveProcessor, new FakeBalanceHelper(), gameQuery, Wednesday);
+            var dto = new AddBoardRequestDto
+            {
+                BoardNumbers = new List<int> { 1, 2, 3, 4, 5 },
+                IsRepeating = false,
+                RepeatCount = 0
+            };
+
+            try
+            {
+                await service.CreateBoard(user.UserId, dto);
+                return true;
+            }
+            catch (ValidationException)
+            {
+                return false;
+            }
+        }
+
+        var results = await Task.WhenAll(Submit(), Submit(), Submit());
+
+        Assert.Single(results, succeeded => succeeded);
+        var boardCount = await _dbContext.Boards.AsNoTracking().CountAsync(b => b.UserId == user.UserId);
+        Assert.Equal(1, boardCount);
     }
 }
