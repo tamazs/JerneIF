@@ -186,6 +186,25 @@ Both the server and client have separate `fly.toml` files and Dockerfiles.
 
 ---
 
+## Security fixes (October 2026)
+
+A review of the access control code found the issues below. All are fixed and covered by xUnit tests.
+
+| Issue | Fix |
+|-------|-----|
+| Any logged-in player could set their own role to Admin, or read and edit other users (`UpdateUser`, `GetUserById`) | Players can only access their own account (403 otherwise). `Role` and `IsActive` can only be changed by admins. The role must match the `UserRole` enum. |
+| CORS allowed every origin | Only the origins in `AppOptions:AllowedOrigins` are allowed (default: local dev server and the deployed client) |
+| A transaction could be approved twice, or denied after it was approved | Only `Pending` transactions can be approved or denied, under a row lock |
+| Two parallel requests could both pass the balance check when buying a board | Board purchases lock the user row inside a database transaction |
+| Deactivated users could still refresh their token | Refresh is refused for inactive users |
+| Unlimited login attempts | Login is locked for 15 minutes after 5 failed attempts for the same email |
+| `UseOpenApi` was registered twice | Removed the duplicate |
+
+**Still open**
+
+- Tokens are stored in `localStorage` (see the trade-offs above).
+- `server/DataAccess/sql/001_users_role_check.sql` (database CHECK on `Users.Role`) has to be run manually on the live database.
+
 ## Current State of the Project
 
 ### Working Features
