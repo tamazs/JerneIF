@@ -321,14 +321,17 @@ public class TransactionServiceTests
         await ClearDatabase();
         var (admin, transaction) = await AddAdminAndPendingTransaction();
 
-        var first = await _transactionService.ApproveTransaction(admin.UserId, transaction.TransactionId);
+        await _transactionService.ApproveTransaction(admin.UserId, transaction.TransactionId);
+
+        // Read what the database stored (Postgres keeps microseconds, .NET keeps 100 nanosecond ticks).
+        var afterFirst = await _dbContext.Transactions.AsNoTracking().FirstAsync(t => t.TransactionId == transaction.TransactionId);
 
         await Assert.ThrowsAsync<ValidationException>(() =>
             _transactionService.ApproveTransaction(admin.UserId, transaction.TransactionId));
 
-        var fromDb = await _dbContext.Transactions.AsNoTracking().FirstAsync(t => t.TransactionId == transaction.TransactionId);
-        Assert.Equal("Approved", fromDb.Status);
-        Assert.Equal(first.ApprovedAt, fromDb.ApprovedAt);
+        var afterSecond = await _dbContext.Transactions.AsNoTracking().FirstAsync(t => t.TransactionId == transaction.TransactionId);
+        Assert.Equal("Approved", afterSecond.Status);
+        Assert.Equal(afterFirst.ApprovedAt, afterSecond.ApprovedAt);
     }
 
     [Fact]
