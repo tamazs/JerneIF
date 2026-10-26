@@ -186,9 +186,9 @@ Both the server and client have separate `fly.toml` files and Dockerfiles.
 
 ---
 
-## Security fixes (October 2026)
+## Security and quality fixes (October 2026)
 
-A review of the access control code found the issues below. All are fixed and covered by xUnit tests.
+A review of the code found the issues below. All are fixed and covered by xUnit tests.
 
 | Issue | Fix |
 |-------|-----|
@@ -199,6 +199,7 @@ A review of the access control code found the issues below. All are fixed and co
 | Deactivated users could still refresh their token | Refresh is refused for inactive users |
 | Unlimited login attempts | Login is locked for 15 minutes after 5 failed attempts for the same email |
 | `UseOpenApi` was registered twice | Removed the duplicate |
+| Repeating boards: creating a new game also lowered the repeat count of the previous board, so the data looked inconsistent | The old board keeps its original repeat count and only stops repeating. The copy in the new game carries the remaining repeats. A test checks that a board repeats exactly the chosen number of times. |
 
 **Still open**
 
@@ -220,9 +221,7 @@ A review of the access control code found the issues below. All are fixed and co
 
 ### Known Issues
 
-- **Repeating Boards Logic:**  
-  When creating a new game, repeating boards are correctly reused.  
-  However, the previous board’s repeat count also decreases, which makes the data look inconsistent in the database, though functionality is correct.
+None at the moment. The previous repeating boards issue is fixed (see the fixes table above).
 
 ---
 

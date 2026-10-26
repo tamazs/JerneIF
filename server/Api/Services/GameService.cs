@@ -57,15 +57,15 @@ public class GameService(JerneDbContext dbContext, ISieveProcessor sieveProcesso
             var numberCount = oldBoard.BoardNumber.BoardNumbers.Count;
             var price = balanceHelper.CalculatePrice(numberCount);
 
+            // The old board keeps the RepeatCount it was bought with. IsRepeating = false only means
+            // "the repeat chain is no longer continued from this board". The copy in the new game carries
+            // the remaining repeats, so exactly one board per user keeps repeating.
+            oldBoard.IsRepeating = false;
+
             if (balance < price)
-            {
-                oldBoard.IsRepeating = false;
-                oldBoard.RepeatCount = 0;
                 continue;
-            }
-            
-            oldBoard.RepeatCount -= 1;
-            oldBoard.IsRepeating = oldBoard.RepeatCount > 0;
+
+            var remainingRepeats = oldBoard.RepeatCount - 1;
 
             var boardNumbers = new BoardNumber
             {
@@ -82,8 +82,8 @@ public class GameService(JerneDbContext dbContext, ISieveProcessor sieveProcesso
                 Price = price,
                 PurchasedAt = DateTime.UtcNow,
                 BoardNumber = boardNumbers,
-                IsRepeating = oldBoard.IsRepeating,
-                RepeatCount = oldBoard.RepeatCount
+                IsRepeating = remainingRepeats > 0,
+                RepeatCount = remainingRepeats
             };
 
             await dbContext.Boards.AddAsync(newBoard);
