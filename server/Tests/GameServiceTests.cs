@@ -221,27 +221,26 @@ public class GameServiceTests
 
         var gameService = new GameService(_dbContext, _sieveProcessor, new FakeBalanceHelper(1000, 100));
 
-        var game1 = await gameService.CreateGame();
-        var game2 = await gameService.CreateGame();
-        var game3 = await gameService.CreateGame();
-
         async Task<List<Board>> BoardsIn(string gameId) =>
             await _dbContext.Boards.AsNoTracking().Where(b => b.GameId == gameId).ToListAsync();
 
+        // Check each game right after it is created: a board hands its repeat on to the next
+        // game and then stops repeating itself, so reading it later would show IsRepeating = false.
+        var game1 = await gameService.CreateGame();
         var inGame1 = await BoardsIn(game1.GameId);
-        var inGame2 = await BoardsIn(game2.GameId);
-        var inGame3 = await BoardsIn(game3.GameId);
-
         Assert.Single(inGame1);
         Assert.Equal(1, inGame1[0].RepeatCount);
         Assert.True(inGame1[0].IsRepeating);
 
+        var game2 = await gameService.CreateGame();
+        var inGame2 = await BoardsIn(game2.GameId);
         Assert.Single(inGame2);
         Assert.Equal(0, inGame2[0].RepeatCount);
         Assert.False(inGame2[0].IsRepeating);
 
         // Repeats are used up, so nothing is copied into the third game.
-        Assert.Empty(inGame3);
+        var game3 = await gameService.CreateGame();
+        Assert.Empty(await BoardsIn(game3.GameId));
     }
 
     [Fact]
